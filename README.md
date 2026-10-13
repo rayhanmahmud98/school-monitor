@@ -26,4 +26,4 @@ Open http://127.0.0.1:8000/
 ## Notes
 
 - `DEBUG = True`, SQLite, hardcoded `SECRET_KEY` — not production-safe.
-- `db.sqlite3` and `media/` are gitignored.
+- `db.sqlite3` and `media/` are gitignored.# school-monitor
