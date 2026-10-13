@@ -1,0 +1,91 @@
+{% extends base_template %}
+{% block title %}Audit log{% endblock %}
+{% block content %}
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold">Audit log</h1>
+  <p class="mt-1 text-sm text-slate-500">
+    Every successful write is recorded here with the acting user, target, and details.
+  </p>
+</div>
+
+<form method="get" class="card mb-4 grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="lg:col-span-2">
+    <label class="mb-1 block text-xs font-medium text-slate-500">Search action, details, or target</label>
+    <input name="q" value="{{ q }}" placeholder="e.g. APPROVED, ATTENDANCE, student name" class="input w-full">
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-slate-500">User</label>
+    <select name="user" class="input w-full">
+      <option value="">All users</option>
+      {% for u in users %}
+        <option value="{{ u.pk }}" {% if user_id == u.pk|stringformat:"s" %}selected{% endif %}>
+          {{ u.username }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="flex items-end gap-2">
+    <button class="btn-primary"><i class="fa-solid fa-filter"></i> Filter</button>
+    <a href="?" class="btn-light">Reset</a>
+  </div>
+</form>
+
+<div class="card overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-200">
+    <thead class="bg-slate-50">
+      <tr>
+        <th class="th">When</th>
+        <th class="th">User</th>
+        <th class="th">Action</th>
+        <th class="th">Target</th>
+        <th class="th">Details</th>
+        <th class="th">IP</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for row in page_obj %}
+        <tr class="align-top hover:bg-slate-50">
+          <td class="td whitespace-nowrap text-slate-500">
+            {{ row.timestamp|date:"Y-m-d H:i:s" }}
+          </td>
+          <td class="td whitespace-nowrap">
+            {% if row.user %}
+              {{ row.user.display_name }}
+            {% else %}
+              <span class="text-slate-400">system</span>
+            {% endif %}
+          </td>
+          <td class="td whitespace-nowrap">
+            <span class="rounded bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
+              {{ row.action }}
+            </span>
+          </td>
+          <td class="td whitespace-nowrap text-slate-600">
+            {% if row.target_model %}
+              {{ row.target_model }}{% if row.target_id %}#{{ row.target_id }}{% endif %}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td class="td max-w-xl text-slate-700">
+            {{ row.details|default:"—"|truncatechars:160 }}
+          </td>
+          <td class="td whitespace-nowrap text-xs text-slate-400">
+            {{ row.ip_address|default:"—" }}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="px-4 py-10 text-center text-slate-500">
+            No audit entries match these filters.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% include "partials/pagination.html" %}
+
+{% endblock %}

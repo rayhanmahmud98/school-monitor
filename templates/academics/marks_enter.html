@@ -1,0 +1,39 @@
+{% extends "base_teacher.html" %}{% load ui_extras %}
+{% block title %}Enter marks{% endblock %}
+{% block content %}
+<a href="{% url 'academics:marks_overview' %}" class="text-sm text-indigo-600 hover:underline">← All marksheets</a>
+<h1 class="mb-1 mt-2 text-2xl font-bold">{{ subject.name }} · {{ subject.class_ref }}</h1>
+<p class="mb-6 text-sm text-slate-500">{{ exam }}</p>
+{% if not any_editable %}
+<div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"><i class="fa-solid fa-lock mr-1"></i>Marks are submitted or approved, so editing is locked.</div>
+{% endif %}
+<form method="post">{% csrf_token %}
+  <div class="mb-4 flex items-center gap-3">
+    <label class="text-sm font-medium">Maximum marks</label>
+    <input name="max_marks" type="number" step="0.01" min="1" value="{{ max_marks }}" class="input w-28" {% if not any_editable %}disabled{% endif %}>
+  </div>
+  <div class="card overflow-x-auto">
+    <table class="min-w-full divide-y divide-slate-200">
+      <thead class="bg-slate-50"><tr><th class="th">Roll</th><th class="th">Student</th><th class="th">Marks</th><th class="th">Grade</th><th class="th">Status</th></tr></thead>
+      <tbody class="divide-y divide-slate-100">
+      {% for r in rows %}
+        <tr>
+          <td class="td">{{ r.student.roll_no }}</td><td class="td font-medium">{{ r.student.full_name }}</td>
+          <td class="td">{% if r.editable %}<input name="marks_{{ r.student.pk }}" type="number" step="0.01" min="0" value="{{ r.value }}" class="input w-28">
+            {% else %}{{ r.sheet.marks_obtained }} / {{ r.sheet.max_marks }}{% endif %}
+            {% if r.editable and r.sheet.rejection_reason %}<div class="mt-1 text-xs text-red-600"><i class="fa-solid fa-rotate-left"></i> Returned: {{ r.sheet.rejection_reason }}</div>{% endif %}</td>
+          <td class="td font-semibold">{{ r.sheet.grade|default:"—" }}</td>
+          <td class="td">{% if r.sheet %}<span class="badge {{ r.sheet.status|status_class }}">{{ r.sheet.get_status_display }}</span>{% else %}<span class="badge {{ 'NOT_STARTED'|status_class }}">Not entered</span>{% endif %}</td>
+        </tr>
+      {% empty %}<tr><td colspan="5" class="px-4 py-10 text-center text-slate-500">No active students in this class.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if any_editable %}
+  <div class="mt-4 flex flex-wrap gap-3">
+    <button name="action" value="draft" class="btn-light"><i class="fa-solid fa-floppy-disk"></i> Save draft</button>
+    <button name="action" value="submit" class="btn-primary" onclick="return confirm('Submit to admin for approval? You will not be able to edit afterwards.')"><i class="fa-solid fa-paper-plane"></i> Submit for approval</button>
+  </div>
+  {% endif %}
+</form>
+{% endblock %}

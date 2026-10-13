@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block nav %}
+{% url 'dashboard:admin' as u %}{% include "partials/nav_item.html" with url=u icon="fa-gauge" label="Dashboard" %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500">People</p>
+{% url 'accounts:user_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-users" label="Users" %}
+{% url 'students:my_students' as u %}{% include "partials/nav_item.html" with url=u icon="fa-user-graduate" label="Students" %}
+{% url 'students:student_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-user-pen" label="Manage students" %}
+{% url 'accounts:link_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-link" label="Parent links" %}
+{% url 'students:class_id_cards_page' as u %}{% include "partials/nav_item.html" with url=u icon="fa-id-card" label="Class ID cards" %}
+{% url 'students:transfer_certificate_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-file-export" label="Transfer certificates" %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500">Academics</p>
+{% url 'students:class_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-chalkboard" label="Classes" %}
+{% url 'students:subject_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-book" label="Subjects" %}
+{% url 'academics:exam_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-file-pen" label="Exams" %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500">Oversight</p>
+{% url 'academics:attendance_mark' as u %}{% include "partials/nav_item.html" with url=u icon="fa-clipboard-user" label="Mark attendance" %}
+{% url 'academics:attendance_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-check" label="Attendance history" %}
+{% url 'academics:marks_overview' as u %}{% include "partials/nav_item.html" with url=u icon="fa-table-list" label="Marksheets" %}
+{% url 'academics:reportcards_manage' as u %}{% include "partials/nav_item.html" with url=u icon="fa-file-pdf" label="Report cards" %}
+{% url 'academics:admit_cards_bulk_page' as u %}{% include "partials/nav_item.html" with url=u icon="fa-id-badge" label="Admit cards" %}
+{% url 'academics:merit_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-ranking-star" label="Merit list" %}
+{% url 'academics:leave_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-day" label="Leave applications" %}
+{% url 'academics:audit_log' as u %}{% include "partials/nav_item.html" with url=u icon="fa-clock-rotate-left" label="Audit log" %}
+{% url 'accounts:login_history' as u %}{% include "partials/nav_item.html" with url=u icon="fa-right-to-bracket" label="Login history" %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500">Settings</p>
+{% url 'academics:year_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar" label="Academic years" %}
+{% url 'academics:scale_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-ranking-star" label="Grading scale" %}
+{% url 'academics:examtype_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-list-check" label="Exam types" %}
+{% endblock %}

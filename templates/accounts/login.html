@@ -1,0 +1,48 @@
+{% extends "base_public.html" %}
+{% block title %}Sign in — School Monitor{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-md">
+  <div class="card p-8">
+    <h1 class="mb-1 text-2xl font-bold">Sign in</h1>
+    <p class="mb-6 text-sm text-slate-500">Welcome back to School Monitor.</p>
+
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="rounded-lg bg-red-50 p-3 text-sm text-red-700">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div>
+        <label class="mb-1 block text-sm font-medium" for="{{ form.username.id_for_label }}">
+          Username
+        </label>
+        {{ form.username }}
+        {% for e in form.username.errors %}<p class="mt-1 text-xs text-red-600">{{ e }}</p>{% endfor %}
+      </div>
+
+      <div>
+        <label class="mb-1 block text-sm font-medium" for="{{ form.password.id_for_label }}">
+          Password
+        </label>
+        {{ form.password }}
+        {% for e in form.password.errors %}<p class="mt-1 text-xs text-red-600">{{ e }}</p>{% endfor %}
+      </div>
+
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
+
+      <button type="submit" class="btn-primary w-full justify-center">
+        <i class="fa-solid fa-right-to-bracket"></i> Sign in
+      </button>
+    </form>
+  </div>
+
+  <p class="mt-6 text-center text-xs text-slate-400">
+    Logins: admin / admin123 &nbsp;·&nbsp; teacher1 / teacher123 &nbsp;·&nbsp; parent1 / parent123
+  </p>
+</div>
+{% endblock %}

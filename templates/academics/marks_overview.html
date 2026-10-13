@@ -1,0 +1,39 @@
+{% extends base_template %}{% load ui_extras %}
+{% block title %}Marksheets{% endblock %}
+{% block content %}
+<h1 class="mb-6 text-2xl font-bold">Marksheets</h1>
+<form method="get" class="card mb-6 flex flex-wrap items-end gap-3 p-4">
+  {% if is_admin %}
+  <div><label class="mb-1 block text-xs text-slate-500">Class</label>
+    <select name="class" class="input"><option value="">All</option>
+      {% for c in classes %}<option value="{{ c.pk }}" {% if f.class == c.pk|stringformat:"s" %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+  {% endif %}
+  <div><label class="mb-1 block text-xs text-slate-500">Subject</label>
+    <select name="subject" class="input"><option value="">All</option>
+      {% for s in subjects %}<option value="{{ s.pk }}" {% if f.subject == s.pk|stringformat:"s" %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+  <div><label class="mb-1 block text-xs text-slate-500">Exam</label>
+    <select name="exam" class="input"><option value="">All</option>
+      {% for e in exams %}<option value="{{ e.pk }}" {% if f.exam == e.pk|stringformat:"s" %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+  <div><label class="mb-1 block text-xs text-slate-500">Status</label>
+    <select name="state" class="input"><option value="">Any</option>
+      {% for k, v in state_labels.items %}<option value="{{ k }}" {% if f.state == k %}selected{% endif %}>{{ v }}</option>{% endfor %}</select></div>
+  <button class="btn-primary">Filter</button><a href="?" class="btn-light">Reset</a>
+</form>
+<div class="card overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-200">
+    <thead class="bg-slate-50"><tr><th class="th">Class</th><th class="th">Subject</th><th class="th">Exam</th>{% if is_admin %}<th class="th">Teacher</th>{% endif %}<th class="th">Entered</th><th class="th">Status</th><th class="th"></th></tr></thead>
+    <tbody class="divide-y divide-slate-100">
+    {% for b in batches %}
+      <tr class="hover:bg-slate-50"><td class="td">{{ b.subject.class_ref }}</td><td class="td font-medium">{{ b.subject.name }}</td><td class="td">{{ b.exam.name }}</td>
+        {% if is_admin %}<td class="td">{{ b.subject.teacher.display_name|default:"—" }}</td>{% endif %}
+        <td class="td">{{ b.entered }} / {{ b.total }}</td>
+        <td class="td"><span class="badge {{ b.state|status_class }}">{{ b.state_label }}</span></td>
+        <td class="td text-right">
+          {% if is_admin %}<a class="btn-light !py-1" href="{% url 'academics:marks_review' b.subject.pk b.exam.pk %}">Review</a>
+          {% else %}<a class="btn-primary !py-1" href="{% url 'academics:marks_enter' b.subject.pk b.exam.pk %}">{% if b.state == 'NOT_STARTED' or b.state == 'DRAFT' %}Enter marks{% else %}View{% endif %}</a>{% endif %}
+        </td></tr>
+    {% empty %}<tr><td colspan="7" class="px-4 py-10 text-center text-slate-500">No marksheets match.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

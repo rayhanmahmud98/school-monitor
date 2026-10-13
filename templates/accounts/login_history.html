@@ -1,0 +1,74 @@
+{% extends base_template %}
+{% block title %}Login history{% endblock %}
+{% block content %}
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold">Login history</h1>
+  <p class="mt-1 text-sm text-slate-500">
+    Every successful login, newest first.
+  </p>
+</div>
+
+<form method="get" class="card mb-4 grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-5">
+  <div class="lg:col-span-2">
+    <label class="mb-1 block text-xs font-medium text-slate-500">Username contains</label>
+    <input name="q" value="{{ q }}" placeholder="e.g. teacher" class="input w-full">
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-slate-500">User ID</label>
+    <input name="user" value="{{ user_id }}" placeholder="numeric" class="input w-full">
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-slate-500">From</label>
+    <input type="date" name="from" value="{{ date_from }}" class="input w-full">
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-slate-500">To</label>
+    <input type="date" name="to" value="{{ date_to }}" class="input w-full">
+  </div>
+  <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-5">
+    <button class="btn-primary"><i class="fa-solid fa-filter"></i> Filter</button>
+    <a href="?" class="btn-light">Reset</a>
+  </div>
+</form>
+
+<div class="card overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-200">
+    <thead class="bg-slate-50">
+      <tr>
+        <th class="th">When</th>
+        <th class="th">User</th>
+        <th class="th">Role</th>
+        <th class="th">IP address</th>
+        <th class="th">User agent</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for row in page_obj %}
+        <tr class="hover:bg-slate-50">
+          <td class="td whitespace-nowrap text-slate-500">{{ row.timestamp|date:"Y-m-d H:i:s" }}</td>
+          <td class="td font-medium">{{ row.user.username }}</td>
+          <td class="td">
+            <span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+              {{ row.user.get_role_display }}
+            </span>
+          </td>
+          <td class="td whitespace-nowrap text-slate-600">{{ row.ip_address|default:"—" }}</td>
+          <td class="td max-w-md truncate text-slate-500" title="{{ row.user_agent }}">
+            {{ row.user_agent|default:"—"|truncatechars:80 }}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" class="px-4 py-10 text-center text-slate-500">
+            No logins recorded yet. Log out and back in to see one appear here.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% include "partials/pagination.html" %}
+
+{% endblock %}

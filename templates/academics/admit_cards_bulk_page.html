@@ -1,0 +1,52 @@
+{% extends base_template %}
+{% block title %}Bulk admit cards{% endblock %}
+{% block content %}
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold">Bulk admit cards</h1>
+  <p class="mt-1 text-sm text-slate-500">
+    Generate a single PDF containing admit cards for every active student in a class.
+    One card per page.
+  </p>
+</div>
+
+<div class="card p-6 max-w-2xl">
+  <form method="get" class="flex flex-wrap items-end gap-3">
+    <div>
+      <label class="mb-1 block text-sm font-medium">Class</label>
+      <select name="class" class="input w-64">
+        <option value="">Select a class…</option>
+        {% for c in classes %}
+          <option value="{{ c.pk }}" {% if selected_class and selected_class.pk == c.pk %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="mb-1 block text-sm font-medium">Exam</label>
+      <select name="exam" class="input w-64">
+        <option value="">Select an exam…</option>
+        {% for e in exams %}
+          <option value="{{ e.pk }}" {% if selected_exam and selected_exam.pk == e.pk %}selected{% endif %}>{{ e.name }} ({{ e.academic_year }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn-primary">
+      <i class="fa-solid fa-filter"></i> Select
+    </button>
+  </form>
+
+  {% if selected_class and selected_exam %}
+    <div class="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
+      <div class="text-sm text-slate-700">
+        Ready: <strong>{{ selected_class }}</strong> · <strong>{{ selected_exam.name }}</strong>
+        · {{ count }} active student{{ count|pluralize }}
+      </div>
+      <a href="{% url 'academics:admit_cards_bulk' selected_class.pk selected_exam.pk %}"
+         class="btn-primary mt-3">
+        <i class="fa-solid fa-download"></i> Download PDF
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

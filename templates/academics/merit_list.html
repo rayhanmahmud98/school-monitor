@@ -1,0 +1,96 @@
+{% extends base_template %}
+{% block title %}Merit list{% endblock %}
+{% block content %}
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold">Merit list</h1>
+  <p class="mt-1 text-sm text-slate-500">
+    Ranked list of students in a class for one exam. Ranks are computed live
+    from approved marks — nothing is cached.
+  </p>
+</div>
+
+<form method="get" class="card mb-6 flex flex-wrap items-end gap-3 p-4">
+  <div>
+    <label class="mb-1 block text-xs font-medium text-slate-500">Class</label>
+    <select name="class" class="input w-64">
+      <option value="">Select a class…</option>
+      {% for c in classes %}
+        <option value="{{ c.pk }}" {% if selected_class and selected_class.pk == c.pk %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-slate-500">Exam</label>
+    <select name="exam" class="input w-64">
+      <option value="">Select an exam…</option>
+      {% for e in exams %}
+        <option value="{{ e.pk }}" {% if selected_exam and selected_exam.pk == e.pk %}selected{% endif %}>{{ e.name }} ({{ e.academic_year }})</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button class="btn-primary"><i class="fa-solid fa-ranking-star"></i> Show</button>
+  {% if selected_class and selected_exam %}
+    <a href="{% url 'academics:merit_list_download' selected_class.pk selected_exam.pk %}" class="btn-light ml-auto">
+      <i class="fa-solid fa-file-pdf"></i> Download PDF
+    </a>
+  {% endif %}
+</form>
+
+{% if selected_class and selected_exam %}
+  <div class="card overflow-x-auto">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-6 py-4">
+      <div>
+        <h2 class="font-semibold">{{ selected_class }} — {{ selected_exam.name }}</h2>
+        <p class="mt-0.5 text-xs text-slate-500">
+          {{ selected_exam.academic_year }}
+          {% if selected_exam.exam_type %}· {{ selected_exam.exam_type.name }}{% endif %}
+          · {{ rows|length }} student{{ rows|length|pluralize }} ranked
+        </p>
+      </div>
+    </div>
+
+    <table class="min-w-full divide-y divide-slate-200">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="th">Rank</th>
+          <th class="th">Roll</th>
+          <th class="th">Student</th>
+          <th class="th">Total</th>
+          <th class="th">Max</th>
+          <th class="th">%</th>
+          <th class="th">Grade</th>
+          <th class="th">GPA</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for r in rows %}
+          <tr class="hover:bg-slate-50">
+            <td class="td font-semibold">{{ r.rank }}</td>
+            <td class="td">{{ r.student.roll_no }}</td>
+            <td class="td font-medium">{{ r.student.full_name }}</td>
+            <td class="td">{{ r.total_obtained|floatformat:"-2" }}</td>
+            <td class="td">{{ r.total_max|floatformat:"-2" }}</td>
+            <td class="td">{{ r.percentage|floatformat:2 }}%</td>
+            <td class="td">
+              <span class="badge bg-indigo-100 text-indigo-800">{{ r.grade }}</span>
+            </td>
+            <td class="td">{{ r.gpa|floatformat:2 }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="8" class="px-4 py-10 text-center text-slate-500">
+              No approved marks for this exam yet. Approve some marksheets first.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="card p-10 text-center text-slate-500">
+    Pick a class and an exam to see the merit list.
+  </div>
+{% endif %}
+
+{% endblock %}

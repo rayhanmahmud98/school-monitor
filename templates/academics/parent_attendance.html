@@ -1,0 +1,24 @@
+{% extends "base_parent.html" %}{% load ui_extras %}
+{% block title %}Attendance{% endblock %}
+{% block content %}
+<h1 class="mb-6 text-2xl font-bold">Attendance</h1>
+{% if not child %}<div class="card p-8 text-center text-slate-600">No students are linked to your account.</div>{% else %}
+{% include "partials/child_switcher.html" %}
+<p class="mb-4 text-sm text-slate-500">{{ child.full_name }} · {{ child.class_ref }}</p>
+<div class="grid grid-cols-2 gap-4 lg:grid-cols-5">
+  <div class="card p-4 text-center"><div class="text-2xl font-bold text-green-600">{{ summary.present }}</div><div class="text-xs text-slate-500">Present days</div></div>
+  <div class="card p-4 text-center"><div class="text-2xl font-bold text-red-600">{{ summary.absent }}</div><div class="text-xs text-slate-500">Absent days</div></div>
+  <div class="card p-4 text-center"><div class="text-2xl font-bold text-yellow-600">{{ summary.late }}</div><div class="text-xs text-slate-500">Late</div></div>
+  <div class="card p-4 text-center"><div class="text-2xl font-bold text-blue-600">{{ summary.excused }}</div><div class="text-xs text-slate-500">Excused</div></div>
+  <div class="card col-span-2 p-4 text-center lg:col-span-1"><div class="text-2xl font-bold">{% if summary.percent is not None %}{{ summary.percent }}%{% else %}—{% endif %}</div><div class="text-xs text-slate-500">Overall rate</div></div>
+</div>
+<h2 class="mb-3 mt-8 font-semibold">Last 60 days</h2>
+<div class="card divide-y divide-slate-100">
+  {% for r in records %}
+  <div class="flex items-center justify-between px-4 py-3 text-sm">
+    <div><div class="font-medium">{{ r.date|date:"D, d M Y" }}</div>{% if r.remarks %}<div class="text-xs text-slate-500">{{ r.remarks }}</div>{% endif %}</div>
+    <span class="badge {{ r.status|status_class }}">{{ r.get_status_display }}</span></div>
+  {% empty %}<div class="px-4 py-8 text-center text-slate-500">No attendance recorded in the last 60 days.</div>{% endfor %}
+</div>
+{% endif %}
+{% endblock %}

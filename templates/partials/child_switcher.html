@@ -1,0 +1,9 @@
+{% if kids|length > 1 %}
+<div class="mb-6 flex flex-wrap gap-2">
+  {% for k in kids %}
+  <a href="?child={{ k.pk }}" class="rounded-full px-4 py-1.5 text-sm font-medium {% if child and k.pk == child.pk %}bg-indigo-600 text-white{% else %}bg-white border border-slate-300 text-slate-700 hover:bg-slate-50{% endif %}">
+    <i class="fa-solid fa-child mr-1"></i>{{ k.full_name }} <span class="opacity-70">({{ k.class_ref }})</span>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}

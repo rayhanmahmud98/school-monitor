@@ -1,0 +1,115 @@
+{% extends base_template %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold">{{ page_title }}</h1>
+    <p class="mt-1 text-sm text-slate-500">{{ page_subtitle }}</p>
+  </div>
+  <a href="{% url 'academics:leave_create' %}" class="btn-primary">
+    <i class="fa-solid fa-plus"></i>
+    {% if is_admin %}New request{% else %}Apply for leave{% endif %}
+  </a>
+</div>
+
+{% if is_admin and pending_count %}
+  <div class="card mb-4 border-l-4 border-amber-400 bg-amber-50 p-4">
+    <div class="flex items-center gap-2 text-sm text-amber-800">
+      <i class="fa-solid fa-hourglass-half"></i>
+      <span>
+        <strong>{{ pending_count }}</strong> request{{ pending_count|pluralize }} awaiting your review.
+        <a href="?status=PENDING" class="underline">Filter to pending</a>
+      </span>
+    </div>
+  </div>
+{% endif %}
+
+<form method="get" class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <div>
+    <label class="mb-1 block text-xs font-medium text-slate-500">Status</label>
+    <select name="status" class="input">
+      <option value="">All</option>
+      {% for k, label in statuses %}
+        <option value="{{ k }}" {% if f_status == k %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% if is_admin %}
+    <div class="min-w-[16rem] flex-1">
+      <label class="mb-1 block text-xs font-medium text-slate-500">Search</label>
+      <input name="q" value="{{ q }}" placeholder="Name or reason" class="input w-full">
+    </div>
+  {% endif %}
+  <button class="btn-primary"><i class="fa-solid fa-filter"></i> Apply</button>
+  {% if f_status or q %}<a href="?" class="btn-light">Reset</a>{% endif %}
+</form>
+
+<div class="card overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-200">
+    <thead class="bg-slate-50">
+      <tr>
+        {% if is_admin %}<th class="th">Applicant</th><th class="th">Type</th>{% endif %}
+        <th class="th">From</th>
+        <th class="th">To</th>
+        <th class="th">Days</th>
+        <th class="th">Reason</th>
+        <th class="th">Status</th>
+        <th class="th">Reviewed</th>
+        {% if is_admin %}<th class="th text-right">Actions</th>{% endif %}
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for lv in page_obj %}
+        <tr class="hover:bg-slate-50">
+          {% if is_admin %}
+            <td class="td font-medium">{{ lv.applicant_display }}</td>
+            <td class="td">
+              <span class="badge bg-slate-100 text-slate-700">{{ lv.get_applicant_type_display }}</span>
+            </td>
+          {% endif %}
+          <td class="td">{{ lv.start_date|date:"d M Y" }}</td>
+          <td class="td">{{ lv.end_date|date:"d M Y" }}</td>
+          <td class="td">{{ lv.days_count }}</td>
+          <td class="td max-w-md truncate" title="{{ lv.reason }}">{{ lv.reason|truncatechars:60 }}</td>
+          <td class="td">
+            {% if lv.status == "PENDING" %}
+              <span class="badge bg-amber-100 text-amber-800">Pending</span>
+            {% elif lv.status == "APPROVED" %}
+              <span class="badge bg-green-100 text-green-800">Approved</span>
+            {% else %}
+              <span class="badge bg-red-100 text-red-800">Rejected</span>
+            {% endif %}
+          </td>
+          <td class="td text-xs text-slate-500">
+            {% if lv.reviewed_at %}
+              {{ lv.reviewed_at|date:"d M Y" }}
+              {% if lv.review_note %}<br><span title="{{ lv.review_note }}">{{ lv.review_note|truncatechars:40 }}</span>{% endif %}
+            {% else %}
+              -
+            {% endif %}
+          </td>
+          {% if is_admin %}
+            <td class="td whitespace-nowrap text-right">
+              {% if lv.status == "PENDING" %}
+                <a href="{% url 'academics:leave_review' lv.pk %}"
+                   class="text-indigo-600 hover:underline">Review</a>
+              {% else %}
+                <span class="text-slate-400">-</span>
+              {% endif %}
+            </td>
+          {% endif %}
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="{% if is_admin %}9{% else %}7{% endif %}" class="px-4 py-10 text-center text-slate-500">
+            No leave applications yet.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% include "partials/pagination.html" %}
+{% endblock %}

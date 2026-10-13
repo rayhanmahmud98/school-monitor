@@ -1,0 +1,49 @@
+{% extends "base_admin.html" %}{% load ui_extras %}
+{% block title %}Report cards{% endblock %}
+{% block content %}
+<h1 class="mb-6 text-2xl font-bold">Report cards</h1>
+<form method="get" class="card mb-6 flex flex-wrap items-end gap-3 p-4">
+  <div><label class="mb-1 block text-xs text-slate-500">Exam</label>
+    <select name="exam" class="input" required><option value="">Select…</option>
+      {% for e in exams %}<option value="{{ e.pk }}" {% if exam and exam.pk == e.pk %}selected{% endif %}>{{ e }}</option>{% endfor %}</select></div>
+  <div><label class="mb-1 block text-xs text-slate-500">Class</label>
+    <select name="class" class="input" required><option value="">Select…</option>
+      {% for c in classes %}<option value="{{ c.pk }}" {% if cls and cls.pk == c.pk %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+  <button class="btn-primary">Show students</button>
+</form>
+
+{% if exam and cls %}
+<div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+  <h2 class="font-semibold">{{ cls }} · {{ exam }}</h2>
+  <form method="post" class="flex gap-2">{% csrf_token %}
+    <input type="hidden" name="exam" value="{{ exam.pk }}"><input type="hidden" name="class" value="{{ cls.pk }}">
+    <button name="action" value="generate_all" class="btn-light"><i class="fa-solid fa-gears"></i> Generate all</button>
+    <button name="action" value="publish_all" class="btn-success"><i class="fa-solid fa-bullhorn"></i> Publish all</button>
+  </form>
+</div>
+<div class="card overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-200">
+    <thead class="bg-slate-50"><tr><th class="th">Roll</th><th class="th">Student</th><th class="th">Approved subjects</th><th class="th">Report card</th><th class="th text-right">Actions</th></tr></thead>
+    <tbody class="divide-y divide-slate-100">
+    {% for r in rows %}
+      <tr><td class="td">{{ r.student.roll_no }}</td><td class="td font-medium">{{ r.student.full_name }}</td>
+        <td class="td">{{ r.approved }} / {{ subject_count }}</td>
+        <td class="td">{% if r.card and r.card.pdf_file %}{% if r.card.is_published %}<span class="badge bg-green-100 text-green-800">Published</span>{% else %}<span class="badge bg-amber-100 text-amber-800">Generated</span>{% endif %}
+          <span class="ml-1 text-xs text-slate-400">{{ r.card.generated_at|date:"d M H:i" }}</span>{% else %}<span class="badge bg-slate-100 text-slate-500">Not generated</span>{% endif %}</td>
+        <td class="td">
+          <form method="post" class="flex flex-wrap justify-end gap-2">{% csrf_token %}
+            <input type="hidden" name="exam" value="{{ exam.pk }}"><input type="hidden" name="class" value="{{ cls.pk }}"><input type="hidden" name="student" value="{{ r.student.pk }}">
+            <button name="action" value="generate" class="btn-light !py-1" {% if not r.approved %}disabled title="No approved marks yet"{% endif %}>{% if r.card %}Regenerate{% else %}Generate{% endif %}</button>
+            {% if r.card and r.card.pdf_file %}
+              {% if r.card.is_published %}<button name="action" value="unpublish" class="btn-light !py-1">Unpublish</button>
+              {% else %}<button name="action" value="publish" class="btn-success !py-1">Publish</button>{% endif %}
+              <a class="btn-primary !py-1" href="{% url 'academics:reportcard_download' r.card.pk %}"><i class="fa-solid fa-download"></i></a>
+            {% endif %}
+          </form></td></tr>
+    {% empty %}<tr><td colspan="5" class="px-4 py-10 text-center text-slate-500">No active students.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="mt-3 text-xs text-slate-500">Report cards use <strong>approved</strong> marksheets only. Parents see a report card only after it is published.</p>
+{% endif %}
+{% endblock %}

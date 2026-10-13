@@ -1,0 +1,48 @@
+{% extends base_template %}
+{% block title %}Review leave{% endblock %}
+{% block content %}
+
+<div class="mx-auto max-w-2xl">
+  <h1 class="mb-6 text-2xl font-bold">Review leave request</h1>
+
+  <div class="card mb-4 p-6">
+    <dl class="grid grid-cols-2 gap-3 text-sm">
+      <dt class="text-slate-500">Applicant</dt>
+      <dd class="font-medium">{{ leave.applicant_display }}</dd>
+
+      <dt class="text-slate-500">Type</dt>
+      <dd>{{ leave.get_applicant_type_display }}</dd>
+
+      <dt class="text-slate-500">Dates</dt>
+      <dd>{{ leave.start_date|date:"d M Y" }} to {{ leave.end_date|date:"d M Y" }} ({{ leave.days_count }} day{{ leave.days_count|pluralize }})</dd>
+
+      <dt class="text-slate-500">Submitted by</dt>
+      <dd>{{ leave.submitted_by.display_name|default:"-" }} on {{ leave.submitted_at|date:"d M Y H:i" }}</dd>
+
+      <dt class="text-slate-500">Reason</dt>
+      <dd class="col-span-2 whitespace-pre-wrap">{{ leave.reason }}</dd>
+    </dl>
+  </div>
+
+  <form method="post" class="card space-y-5 p-6">
+    {% csrf_token %}
+
+    {% for field in form %}
+      <div>
+        <label class="mb-1 block text-sm font-medium" for="{{ field.id_for_label }}">
+          {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+        </label>
+        {{ field }}
+        {% if field.help_text %}<p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>{% endif %}
+        {% for e in field.errors %}<p class="mt-1 text-xs text-red-600">{{ e }}</p>{% endfor %}
+      </div>
+    {% endfor %}
+
+    <div class="flex gap-3 pt-2">
+      <button class="btn-primary"><i class="fa-solid fa-check"></i> Submit decision</button>
+      <a href="{% url 'academics:leave_list' %}" class="btn-light">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

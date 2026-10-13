@@ -1,0 +1,9 @@
+{% if page_obj.has_other_pages %}
+<div class="mt-4 flex items-center justify-between text-sm text-slate-600">
+  <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} · {{ page_obj.paginator.count }} records</span>
+  <div class="flex gap-2">
+    {% if page_obj.has_previous %}<a class="btn-light" href="?{% if qs %}{{ qs }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    {% if page_obj.has_next %}<a class="btn-light" href="?{% if qs %}{{ qs }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </div>
+</div>
+{% endif %}

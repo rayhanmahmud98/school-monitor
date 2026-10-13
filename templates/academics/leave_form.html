@@ -1,0 +1,48 @@
+{% extends base_template %}
+{% block title %}Apply for leave{% endblock %}
+{% block content %}
+
+<div class="mx-auto max-w-2xl">
+  <h1 class="mb-1 text-2xl font-bold">
+    {% if is_teacher %}Apply for my leave{% elif is_parent %}Apply for my child's leave{% else %}New leave request{% endif %}
+  </h1>
+  <p class="mb-6 text-sm text-slate-500">
+    {% if is_teacher %}
+      File a leave request. Your admin will review and approve it.
+    {% elif is_parent %}
+      File leave for one of your children. The admin will review it.
+    {% else %}
+      File a leave on behalf of a teacher or a student.
+    {% endif %}
+  </p>
+
+  <form method="post" class="card space-y-5 p-6">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% for field in form %}
+      {% if field.is_hidden %}
+        {{ field }}
+      {% else %}
+        <div>
+          <label class="mb-1 block text-sm font-medium" for="{{ field.id_for_label }}">
+            {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+          </label>
+          {{ field }}
+          {% if field.help_text %}<p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>{% endif %}
+          {% for e in field.errors %}<p class="mt-1 text-xs text-red-600">{{ e }}</p>{% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <div class="flex gap-3 pt-2">
+      <button class="btn-primary"><i class="fa-solid fa-paper-plane"></i> Submit request</button>
+      <a href="{% url 'academics:leave_list' %}" class="btn-light">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

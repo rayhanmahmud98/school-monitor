@@ -1,0 +1,1 @@
+{% load ui_extras %}<a href="{{ url }}" class="flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm {% if request.path|startswith:url %}bg-indigo-600 text-white{% else %}text-slate-300 hover:bg-slate-800{% endif %}"><i class="fa-solid {{ icon }} w-5 text-center"></i>{{ label }}</a>

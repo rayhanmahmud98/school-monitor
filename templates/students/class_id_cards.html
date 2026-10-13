@@ -1,0 +1,47 @@
+python - <<'PYEOF'
+from pathlib import Path
+content = '''{% extends base_template %}
+{% block title %}Class ID cards{% endblock %}
+{% block content %}
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold">Class ID cards</h1>
+  <p class="mt-1 text-sm text-slate-500">
+    Generate a single PDF containing an ID card for every active student in a class.
+    Two cards per A4 page.
+  </p>
+</div>
+
+<div class="card p-6 max-w-2xl">
+  <form method="get" class="flex flex-wrap items-end gap-3">
+    <div>
+      <label class="mb-1 block text-sm font-medium">Class</label>
+      <select name="class" class="input w-64">
+        <option value="">Select a class…</option>
+        {% for c in classes %}
+          <option value="{{ c.pk }}">{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn-primary">
+      <i class="fa-solid fa-file-pdf"></i> Generate PDF
+    </button>
+  </form>
+
+  {% if selected %}
+    <div class="mt-6 flex items-center gap-3">
+      <div class="text-sm text-slate-600">
+        Ready: <strong>{{ selected }}</strong> ({{ count }} active student{{ count|pluralize }})
+      </div>
+      <a href="{% url 'students:class_id_cards' selected.pk %}" class="btn-primary">
+        <i class="fa-solid fa-download"></i> Download ID cards
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+'''
+Path("templates/students/class_id_cards.html").write_text(content)
+print("written:", Path("templates/students/class_id_cards.html").exists())
+PYEOF

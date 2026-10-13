@@ -1,0 +1,85 @@
+{% extends "base_teacher.html" %}{% load ui_extras %}
+{% block title %}Teacher dashboard{% endblock %}
+{% block content %}
+
+<h1 class="mb-1 text-2xl font-bold">Welcome, {{ request.user.display_name }}</h1>
+<p class="mb-6 text-sm text-slate-500">{{ today|date:"l, d F Y" }}</p>
+
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  {% include "partials/stat_card.html" with label="Assigned classes" value=classes.count icon="fa-chalkboard" color="indigo" %}
+  {% include "partials/stat_card.html" with label="Assigned subjects" value=subjects.count icon="fa-book" color="sky" %}
+  {% include "partials/stat_card.html" with label="Attendance pending today" value=pending_attendance|length icon="fa-clipboard-user" color="red" %}
+  {% include "partials/stat_card.html" with label="Marksheets to submit" value=pending_marks_count icon="fa-table-list" color="amber" %}
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <div class="card p-6">
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="font-semibold">My classes &amp; subjects</h2>
+      <a href="{% url 'students:my_students' %}" class="text-sm text-indigo-600 hover:underline">
+        My students →
+      </a>
+    </div>
+    <ul class="divide-y divide-slate-100 text-sm">
+      {% for s in subjects %}
+        <li class="flex justify-between py-2">
+          <span class="font-medium">{{ s.name }}</span>
+          <span class="text-slate-500">{{ s.class_ref }}</span>
+        </li>
+      {% empty %}
+        <li class="py-2 text-slate-500">You have no subjects assigned yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="mb-4 font-semibold">Attendance to mark today</h2>
+    {% for p in pending_attendance %}
+      <div class="mb-2 flex items-center justify-between rounded-lg bg-red-50 px-4 py-3 text-sm">
+        <span><strong>{{ p.cls }}</strong> · {{ p.marked }}/{{ p.total }} marked</span>
+        <a class="btn-primary !py-1"
+           href="{% url 'academics:attendance_mark' %}?class={{ p.cls.pk }}">Mark</a>
+      </div>
+    {% empty %}
+      <p class="text-sm text-green-700">
+        <i class="fa-solid fa-circle-check mr-1"></i>All your classes are marked for today.
+      </p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card mt-6 p-6">
+  <div class="mb-4 flex items-center justify-between">
+    <h2 class="font-semibold">Marksheets still to submit</h2>
+    <a href="{% url 'academics:marks_overview' %}" class="text-sm text-indigo-600 hover:underline">
+      All marksheets →
+    </a>
+  </div>
+  {% for b in pending_marks %}
+    <div class="mb-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 px-4 py-3 text-sm">
+      <span>
+        <strong>{{ b.subject.name }}</strong> · {{ b.subject.class_ref }} · {{ b.exam.name }}
+      </span>
+      <span class="flex items-center gap-3">
+        <span class="badge {{ b.state|status_class }}">{{ b.state }}</span>
+        <a class="btn-light !py-1"
+           href="{% url 'academics:marks_enter' b.subject.pk b.exam.pk %}">Open</a>
+      </span>
+    </div>
+  {% empty %}
+    <p class="text-sm text-slate-500">Nothing pending.</p>
+  {% endfor %}
+</div>
+
+<div class="card mt-6 p-6">
+  <h2 class="mb-3 font-semibold">Quick downloads</h2>
+  <p class="mb-4 text-sm text-slate-500">
+    Progress reports are A4 PDFs covering attendance, marks, grades, and class rank.
+    Open your student list to download one per student.
+  </p>
+  <a href="{% url 'students:my_students' %}" class="btn-primary">
+    <i class="fa-solid fa-user-graduate"></i> My students
+  </a>
+</div>
+
+{% endblock %}

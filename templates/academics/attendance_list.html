@@ -1,0 +1,31 @@
+{% extends base_template %}{% load ui_extras %}
+{% block title %}Attendance history{% endblock %}
+{% block content %}
+<h1 class="mb-6 text-2xl font-bold">Attendance history</h1>
+<form method="get" class="card mb-6 flex flex-wrap items-end gap-3 p-4">
+  <div><label class="mb-1 block text-xs text-slate-500">Class</label>
+    <select name="class" class="input"><option value="">All</option>
+      {% for c in classes %}<option value="{{ c.pk }}" {% if f.class == c.pk|stringformat:"s" %}selected{% endif %}>{{ c }}</option>{% endfor %}</select></div>
+  <div><label class="mb-1 block text-xs text-slate-500">Student</label><input name="q" value="{{ f.q }}" class="input" placeholder="Name"></div>
+  <div><label class="mb-1 block text-xs text-slate-500">Status</label>
+    <select name="status" class="input"><option value="">Any</option>
+      {% for v, l in statuses %}<option value="{{ v }}" {% if f.status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select></div>
+  <div><label class="mb-1 block text-xs text-slate-500">From</label><input type="date" name="from" value="{{ f.from }}" class="input"></div>
+  <div><label class="mb-1 block text-xs text-slate-500">To</label><input type="date" name="to" value="{{ f.to }}" class="input"></div>
+  <button class="btn-primary">Filter</button><a href="?" class="btn-light">Reset</a>
+</form>
+<div class="card overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-200">
+    <thead class="bg-slate-50"><tr><th class="th">Date</th><th class="th">Student</th><th class="th">Class</th><th class="th">Status</th><th class="th">Remarks</th><th class="th">Marked by</th>{% if role == 'ADMIN' %}<th class="th"></th>{% endif %}</tr></thead>
+    <tbody class="divide-y divide-slate-100">
+    {% for a in page_obj %}
+      <tr class="hover:bg-slate-50"><td class="td whitespace-nowrap">{{ a.date|date:"d M Y" }}</td><td class="td font-medium">{{ a.student.full_name }}</td><td class="td">{{ a.student.class_ref }}</td>
+        <td class="td"><span class="badge {{ a.status|status_class }}">{{ a.get_status_display }}</span></td><td class="td text-slate-500">{{ a.remarks }}</td>
+        <td class="td text-xs text-slate-500">{{ a.marked_by.display_name|default:"—" }}<br>{{ a.marked_at|date:"d M H:i" }}</td>
+        {% if role == 'ADMIN' %}<td class="td text-right"><a class="text-indigo-600 hover:underline" href="{% url 'academics:attendance_edit' a.pk %}">Override</a></td>{% endif %}</tr>
+    {% empty %}<tr><td colspan="7" class="px-4 py-10 text-center text-slate-500">No attendance records match.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pagination.html" %}
+{% endblock %}

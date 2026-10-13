@@ -1,0 +1,159 @@
+{% extends "base_admin.html" %}{% load ui_extras %}
+{% block title %}Admin dashboard{% endblock %}
+{% block content %}
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold">Dashboard overview</h1>
+  <p class="mt-1 text-sm text-slate-500">Monitor and streamline school administration in one place.</p>
+</div>
+
+<!-- ================= Stat cards ================= -->
+<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  {% include "partials/stat_card.html" with label="Total students" value=students icon="fa-user-graduate" color="indigo" %}
+  {% include "partials/stat_card.html" with label="Total teachers" value=teachers icon="fa-chalkboard-user" color="sky" %}
+  {% include "partials/stat_card.html" with label="Total parents" value=parents icon="fa-people-roof" color="violet" %}
+  {% include "partials/stat_card.html" with label="Total classes" value=classes_count icon="fa-chalkboard" color="emerald" %}
+
+  <div class="card flex items-center gap-4 p-5">
+    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-600 text-xl"><i class="fa-solid fa-clipboard-check"></i></div>
+    <div>
+      <div class="text-2xl font-bold">{% if attendance_percent is not None %}{{ attendance_percent }}%{% else %}—{% endif %}</div>
+      <div class="text-sm text-slate-500">Attendance rate</div>
+    </div>
+  </div>
+
+  <div class="card flex items-center gap-4 p-5">
+    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600 text-xl"><i class="fa-solid fa-ranking-star"></i></div>
+    <div>
+      <div class="text-2xl font-bold">{% if avg_grade_percent is not None %}{{ avg_grade_percent }}%{% else %}—{% endif %}</div>
+      <div class="text-sm text-slate-500">Average grade</div>
+    </div>
+  </div>
+
+  <a href="{% url 'academics:marks_overview' %}?state=SUBMITTED" class="block">
+    <div class="card flex items-center gap-4 p-5 hover:ring-2 hover:ring-amber-200">
+      <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-600 text-xl"><i class="fa-solid fa-hourglass-half"></i></div>
+      <div>
+        <div class="text-2xl font-bold">{{ pending_batches }}</div>
+        <div class="text-sm text-slate-500">Marksheets awaiting approval</div>
+      </div>
+    </div>
+  </a>
+
+  <a href="{% url 'academics:reportcards_manage' %}" class="block">
+    <div class="card flex items-center gap-4 p-5 hover:ring-2 hover:ring-indigo-200">
+      <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 text-xl"><i class="fa-solid fa-file-pdf"></i></div>
+      <div>
+        <div class="text-2xl font-bold">{{ unpublished_cards }}</div>
+        <div class="text-sm text-slate-500">Unpublished report cards</div>
+      </div>
+    </div>
+  </a>
+</div>
+
+<!-- ================= Charts ================= -->
+<div class="mt-6 grid gap-6 lg:grid-cols-3">
+  <div class="card p-6 lg:col-span-2">
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="font-semibold">Attendance trend (last 6 months)</h2>
+      <span class="text-xs text-slate-400">Present + Late as % of total marked</span>
+    </div>
+    <canvas id="attendanceChart" height="120"></canvas>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="mb-4 font-semibold">Gender split</h2>
+    <canvas id="genderChart" height="180"></canvas>
+    <div class="mt-4 flex justify-center gap-4 text-xs">
+      {% for label in chart_gender_labels %}
+        <span class="flex items-center gap-2">
+          <span class="inline-block h-2 w-2 rounded-full" style="background:{% cycle '#6366f1' '#22d3ee' '#a78bfa' '#f59e0b' %}"></span>
+          {{ label }}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="mt-6 card p-6">
+  <h2 class="mb-4 font-semibold">Students per class</h2>
+  <canvas id="classChart" height="90"></canvas>
+</div>
+
+<!-- ================= Chart.js ================= -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  const brand = '#6366f1';
+
+  // --- Attendance trend (line) ---
+  new Chart(document.getElementById('attendanceChart'), {
+    type: 'line',
+    data: {
+      labels: {{ chart_attendance_labels|safe }},
+      datasets: [{
+        label: '% attended',
+        data: {{ chart_attendance_values|safe }},
+        borderColor: brand,
+        backgroundColor: 'rgba(99,102,241,0.12)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 3,
+        pointBackgroundColor: brand,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // --- Gender split (donut) ---
+  new Chart(document.getElementById('genderChart'), {
+    type: 'doughnut',
+    data: {
+      labels: {{ chart_gender_labels|safe }},
+      datasets: [{
+        data: {{ chart_gender_values|safe }},
+        backgroundColor: ['#6366f1', '#22d3ee', '#a78bfa', '#f59e0b', '#94a3b8'],
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '62%',
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  // --- Students per class (bar) ---
+  new Chart(document.getElementById('classChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ chart_class_labels|safe }},
+      datasets: [{
+        label: 'Active students',
+        data: {{ chart_class_values|safe }},
+        backgroundColor: brand,
+        borderRadius: 6,
+        maxBarThickness: 36,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+})();
+</script>
+
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends "base_parent.html" %}{% load ui_extras %}
+{% block title %}My child{% endblock %}
+{% block content %}
+
+{% if not child %}
+  <div class="card p-8 text-center text-slate-600">
+    No students are linked to your account yet. Please contact the school office.
+  </div>
+{% else %}
+
+{% include "partials/child_switcher.html" %}
+
+<div class="card mb-6 flex flex-wrap items-center gap-4 p-5">
+  {% if child.photo %}
+    <img src="{{ child.photo.url }}" class="h-16 w-16 rounded-full object-cover" alt="">
+  {% else %}
+    <div class="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-2xl text-indigo-600">
+      <i class="fa-solid fa-child"></i>
+    </div>
+  {% endif %}
+
+  <div class="min-w-0 flex-1">
+    <h1 class="text-xl font-bold">{{ child.full_name }}</h1>
+    <p class="text-sm text-slate-500">
+      {{ child.class_ref }} · Roll no. {{ child.roll_no }}
+      {% if child.student_id %}· ID {{ child.student_id }}{% endif %}
+      {% if child.blood_group %}· Blood {{ child.blood_group }}{% endif %}
+    </p>
+  </div>
+
+  <a href="{% url 'academics:student_progress_pdf' child.pk %}"
+     class="btn-primary">
+    <i class="fa-solid fa-file-pdf"></i> Progress report
+  </a>
+</div>
+
+<div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold text-green-600">{{ summary.present }}</div>
+    <div class="text-xs text-slate-500">Present (30 days)</div>
+  </div>
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold text-red-600">{{ summary.absent }}</div>
+    <div class="text-xs text-slate-500">Absent</div>
+  </div>
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold text-yellow-600">{{ summary.late }}</div>
+    <div class="text-xs text-slate-500">Late</div>
+  </div>
+  <div class="card p-4 text-center">
+    <div class="text-2xl font-bold">
+      {% if summary.percent is not None %}{{ summary.percent }}%{% else %}—{% endif %}
+    </div>
+    <div class="text-xs text-slate-500">Attendance rate</div>
+  </div>
+</div>
+
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <div class="card p-6">
+    <div class="mb-3 flex items-center justify-between">
+      <h2 class="font-semibold">Recent attendance</h2>
+      <a class="text-sm text-indigo-600 hover:underline"
+         href="{% url 'academics:parent_attendance' %}?child={{ child.pk }}">See all →</a>
+    </div>
+    {% for r in recent %}
+      <div class="flex items-center justify-between border-b border-slate-100 py-2 text-sm last:border-0">
+        <span>{{ r.date|date:"D, d M" }}</span>
+        <span class="badge {{ r.status|status_class }}">{{ r.get_status_display }}</span>
+      </div>
+    {% empty %}
+      <p class="text-sm text-slate-500">No attendance recorded yet.</p>
+    {% endfor %}
+  </div>
+
+  <div class="card p-6">
+    <h2 class="mb-3 font-semibold">Report cards</h2>
+    {% for c in cards %}
+      <div class="flex items-center justify-between border-b border-slate-100 py-2 text-sm last:border-0">
+        <span><i class="fa-solid fa-file-pdf mr-2 text-red-500"></i>{{ c.exam.name }}</span>
+        <a class="btn-primary !py-1" href="{% url 'academics:reportcard_download' c.pk %}">
+          <i class="fa-solid fa-download"></i> PDF
+        </a>
+      </div>
+    {% empty %}
+      <p class="text-sm text-slate-500">No report cards have been published yet.</p>
+    {% endfor %}
+    <a class="mt-3 inline-block text-sm text-indigo-600 hover:underline"
+       href="{% url 'academics:parent_marks' %}?child={{ child.pk }}">View marks →</a>
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}

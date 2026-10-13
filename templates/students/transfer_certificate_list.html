@@ -1,0 +1,67 @@
+{% extends base_template %}
+{% block title %}Transfer certificates{% endblock %}
+{% block content %}
+
+<div class="mb-6">
+  <h1 class="text-2xl font-bold">Transfer certificates</h1>
+  <p class="mt-1 text-sm text-slate-500">
+    Every TC the school has issued, newest first.
+  </p>
+</div>
+
+<form method="get" class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+  <div class="min-w-[18rem] flex-1">
+    <label class="mb-1 block text-xs font-medium text-slate-500">Search</label>
+    <input name="q" value="{{ q }}" placeholder="TC number, student name, ID, or note" class="input w-full">
+  </div>
+  <button class="btn-primary"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+  {% if q %}<a href="?" class="btn-light">Reset</a>{% endif %}
+</form>
+
+<div class="card overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-200">
+    <thead class="bg-slate-50">
+      <tr>
+        <th class="th">TC No.</th>
+        <th class="th">Student</th>
+        <th class="th">Class</th>
+        <th class="th">Reason</th>
+        <th class="th">Leaving date</th>
+        <th class="th">Issued</th>
+        <th class="th text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for tc in page_obj %}
+        <tr class="hover:bg-slate-50">
+          <td class="td font-mono text-xs">{{ tc.tc_number }}</td>
+          <td class="td font-medium">{{ tc.student.full_name }}</td>
+          <td class="td">{{ tc.student.class_ref }}</td>
+          <td class="td">{{ tc.get_reason_display }}</td>
+          <td class="td">{{ tc.date_of_leaving|date:"d M Y" }}</td>
+          <td class="td whitespace-nowrap text-slate-500">
+            {{ tc.issued_at|date:"d M Y H:i" }}
+            {% if tc.issued_by %}<br><span class="text-xs">by {{ tc.issued_by.display_name }}</span>{% endif %}
+          </td>
+          <td class="td whitespace-nowrap text-right">
+            <a href="{% url 'students:transfer_certificate' tc.student.pk %}"
+               class="text-indigo-600 hover:underline mr-3">Edit</a>
+            <a href="{% url 'students:transfer_certificate_download' tc.student.pk %}"
+               class="text-slate-600 hover:underline" title="Download PDF">
+              <i class="fa-solid fa-file-pdf"></i>
+            </a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="7" class="px-4 py-10 text-center text-slate-500">
+            No transfer certificates issued yet.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% include "partials/pagination.html" %}
+{% endblock %}

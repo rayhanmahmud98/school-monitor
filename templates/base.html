@@ -1,0 +1,88 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}School Monitor{% endblock %}</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    .btn-primary { @apply inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700; }
+    .btn-light   { @apply inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50; }
+    .card        { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
+    .input       { @apply w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500; }
+    .th          { @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500; }
+    .td          { @apply px-4 py-3 text-sm text-slate-700; }
+    .badge       { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900">
+
+  <div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="hidden w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-900 text-slate-100 lg:flex">
+      <div class="flex h-16 items-center gap-2 border-b border-slate-800 px-5">
+        <i class="fa-solid fa-school text-indigo-400"></i>
+        <span class="font-semibold tracking-tight">School Monitor</span>
+      </div>
+      <nav class="flex-1 overflow-y-auto py-3">
+        {% block nav %}{% endblock %}
+      </nav>
+      <div class="border-t border-slate-800 p-4">
+        <div class="mb-2 text-xs text-slate-400">
+          Signed in as <span class="font-medium text-slate-200">{{ request.user.display_name }}</span>
+        </div>
+        <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+          {% csrf_token %}
+          <button type="submit"
+                  class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white">
+            <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>
+            <span>Log out</span>
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="flex min-w-0 flex-1 flex-col">
+      <!-- Mobile top bar -->
+      <header class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 lg:hidden">
+        <button id="menu-toggle" class="rounded-md p-2 hover:bg-slate-100">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <span class="font-semibold">School Monitor</span>
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="rounded-md p-2 text-slate-600 hover:bg-slate-100" title="Log out">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </form>
+      </header>
+
+      <!-- Mobile sidebar drawer -->
+      <div id="mobile-nav" class="hidden border-b border-slate-800 bg-slate-900 text-slate-100 lg:hidden">
+        <nav class="py-3">{% block nav_mobile %}{% endblock %}</nav>
+      </div>
+
+      <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 lg:px-8">
+        {% include "partials/messages.html" %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const toggle = document.getElementById('menu-toggle');
+    const drawer = document.getElementById('mobile-nav');
+    if (toggle && drawer) {
+      toggle.addEventListener('click', () => drawer.classList.toggle('hidden'));
+    }
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

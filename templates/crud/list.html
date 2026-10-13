@@ -1,0 +1,37 @@
+{% extends base_template %}{% load ui_extras %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <h1 class="text-2xl font-bold">{{ title }}</h1>
+  <a href="{{ create_url }}" class="btn-primary"><i class="fa-solid fa-plus"></i> Add {{ singular }}</a>
+</div>
+{% if searchable %}
+<form method="get" class="mb-4 flex gap-2">
+  <input name="q" value="{{ q }}" placeholder="Search…" class="input w-full max-w-sm">
+  <button class="btn-light"><i class="fa-solid fa-magnifying-glass"></i></button>
+  {% if q %}<a href="?" class="btn-light">Clear</a>{% endif %}
+</form>
+{% endif %}
+<div class="card overflow-x-auto">
+  <table class="min-w-full divide-y divide-slate-200">
+    <thead class="bg-slate-50"><tr>
+      {% for label, path in columns %}<th class="th">{{ label }}</th>{% endfor %}
+      <th class="th text-right">Actions</th>
+    </tr></thead>
+    <tbody class="divide-y divide-slate-100">
+      {% for obj in object_list %}
+      <tr class="hover:bg-slate-50">
+        {% for label, path in columns %}<td class="td">{{ obj|attr:path }}</td>{% endfor %}
+        <td class="td whitespace-nowrap text-right">
+          {% if update_name %}<a href="{% url update_name obj.pk %}" class="text-indigo-600 hover:underline mr-3">Edit</a>{% endif %}
+          <a href="{% url delete_name obj.pk %}" class="text-red-600 hover:underline">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="{{ columns|length|add:1 }}" class="px-4 py-10 text-center text-slate-500">No records found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "partials/pagination.html" %}
+{% endblock %}

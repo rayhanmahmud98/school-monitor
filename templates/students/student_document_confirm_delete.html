@@ -1,0 +1,20 @@
+{% extends base_template %}
+{% block title %}Delete document{% endblock %}
+{% block content %}
+
+<div class="mx-auto max-w-lg">
+  <div class="card p-6">
+    <h1 class="text-xl font-bold">Delete document?</h1>
+    <p class="mt-2 text-sm text-slate-600">
+      Permanently delete <strong>{{ doc.display_title }}</strong> from
+      <strong>{{ student.full_name }}</strong>'s record?
+    </p>
+    <form method="post" class="mt-6 flex gap-3">
+      {% csrf_token %}
+      <button class="btn-primary !bg-red-600"><i class="fa-solid fa-trash"></i> Yes, delete</button>
+      <a href="{% url 'students:student_documents' student.pk %}" class="btn-light">Cancel</a>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
