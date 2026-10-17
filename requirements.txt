@@ -5,4 +5,4 @@ pypdf
 dj-database-url
 psycopg2-binary
 whitenoise
-gunicornhttps://chat.deepseek.com/a/chat/s/2aae0978-31e8-4ab7-b35f-07b9e11ec936
+gunicorn
