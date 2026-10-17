@@ -1,0 +1,9 @@
+{% url 'dashboard:parent' as u %}{% include "partials/nav_item.html" with url=u icon="fa-gauge" label="Dashboard" show_label=show_label %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">My child</p>
+{% url 'academics:parent_attendance' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-check" label="Attendance" show_label=show_label %}
+{% url 'academics:parent_marks' as u %}{% include "partials/nav_item.html" with url=u icon="fa-table-list" label="Marks" show_label=show_label %}
+{% url 'academics:parent_reportcards' as u %}{% include "partials/nav_item.html" with url=u icon="fa-file-pdf" label="Report cards" show_label=show_label %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">Requests</p>
+{% url 'academics:leave_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-day" label="Leave" show_label=show_label %}

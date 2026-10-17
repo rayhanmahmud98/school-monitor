@@ -6,6 +6,7 @@ app_name = "students"
 
 urlpatterns = [
     path("mine/", views.my_students, name="my_students"),
+    path("manage/", views.manage_students, name="manage_students"),
 
     path("transfer-certificates/",
          views.transfer_certificate_list, name="transfer_certificate_list"),

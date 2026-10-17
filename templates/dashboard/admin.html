@@ -8,44 +8,52 @@
 </div>
 
 <!-- ================= Stat cards ================= -->
-<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+<div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
   {% include "partials/stat_card.html" with label="Total students" value=students icon="fa-user-graduate" color="indigo" %}
   {% include "partials/stat_card.html" with label="Total teachers" value=teachers icon="fa-chalkboard-user" color="sky" %}
   {% include "partials/stat_card.html" with label="Total parents" value=parents icon="fa-people-roof" color="violet" %}
   {% include "partials/stat_card.html" with label="Total classes" value=classes_count icon="fa-chalkboard" color="emerald" %}
 
-  <div class="card flex items-center gap-4 p-5">
-    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-600 text-xl"><i class="fa-solid fa-clipboard-check"></i></div>
-    <div>
-      <div class="text-2xl font-bold">{% if attendance_percent is not None %}{{ attendance_percent }}%{% else %}—{% endif %}</div>
-      <div class="text-sm text-slate-500">Attendance rate</div>
+  <div class="card flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-600 text-base sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
+      <i class="fa-solid fa-clipboard-check"></i>
+    </div>
+    <div class="min-w-0">
+      <div class="text-lg font-bold leading-tight sm:text-2xl">{% if attendance_percent is not None %}{{ attendance_percent }}%{% else %}—{% endif %}</div>
+      <div class="text-xs text-slate-500 sm:text-sm">Attendance rate</div>
     </div>
   </div>
 
-  <div class="card flex items-center gap-4 p-5">
-    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600 text-xl"><i class="fa-solid fa-ranking-star"></i></div>
-    <div>
-      <div class="text-2xl font-bold">{% if avg_grade_percent is not None %}{{ avg_grade_percent }}%{% else %}—{% endif %}</div>
-      <div class="text-sm text-slate-500">Average grade</div>
+  <div class="card flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600 text-base sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
+      <i class="fa-solid fa-ranking-star"></i>
+    </div>
+    <div class="min-w-0">
+      <div class="text-lg font-bold leading-tight sm:text-2xl">{% if avg_grade_percent is not None %}{{ avg_grade_percent }}%{% else %}—{% endif %}</div>
+      <div class="text-xs text-slate-500 sm:text-sm">Average grade</div>
     </div>
   </div>
 
   <a href="{% url 'academics:marks_overview' %}?state=SUBMITTED" class="block">
-    <div class="card flex items-center gap-4 p-5 hover:ring-2 hover:ring-amber-200">
-      <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-600 text-xl"><i class="fa-solid fa-hourglass-half"></i></div>
-      <div>
-        <div class="text-2xl font-bold">{{ pending_batches }}</div>
-        <div class="text-sm text-slate-500">Marksheets awaiting approval</div>
+    <div class="card flex flex-col gap-2 p-3 hover:ring-2 hover:ring-amber-200 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600 text-base sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
+        <i class="fa-solid fa-hourglass-half"></i>
+      </div>
+      <div class="min-w-0">
+        <div class="text-lg font-bold leading-tight sm:text-2xl">{{ pending_batches }}</div>
+        <div class="text-xs text-slate-500 sm:text-sm">Marksheets awaiting approval</div>
       </div>
     </div>
   </a>
 
   <a href="{% url 'academics:reportcards_manage' %}" class="block">
-    <div class="card flex items-center gap-4 p-5 hover:ring-2 hover:ring-indigo-200">
-      <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600 text-xl"><i class="fa-solid fa-file-pdf"></i></div>
-      <div>
-        <div class="text-2xl font-bold">{{ unpublished_cards }}</div>
-        <div class="text-sm text-slate-500">Unpublished report cards</div>
+    <div class="card flex flex-col gap-2 p-3 hover:ring-2 hover:ring-indigo-200 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
+      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 text-base sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
+        <i class="fa-solid fa-file-pdf"></i>
+      </div>
+      <div class="min-w-0">
+        <div class="text-lg font-bold leading-tight sm:text-2xl">{{ unpublished_cards }}</div>
+        <div class="text-xs text-slate-500 sm:text-sm">Unpublished report cards</div>
       </div>
     </div>
   </a>
@@ -53,18 +61,25 @@
 
 <!-- ================= Charts ================= -->
 <div class="mt-6 grid gap-6 lg:grid-cols-3">
-  <div class="card p-6 lg:col-span-2">
-    <div class="mb-4 flex items-center justify-between">
+
+  <!-- Attendance trend -->
+  <div class="card p-4 sm:p-6 lg:col-span-2">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
       <h2 class="font-semibold">Attendance trend (last 6 months)</h2>
       <span class="text-xs text-slate-400">Present + Late as % of total marked</span>
     </div>
-    <canvas id="attendanceChart" height="120"></canvas>
+    <div class="relative h-52 w-full overflow-hidden sm:h-72">
+      <canvas id="attendanceChart"></canvas>
+    </div>
   </div>
 
-  <div class="card p-6">
+  <!-- Gender split -->
+  <div class="card p-4 sm:p-6">
     <h2 class="mb-4 font-semibold">Gender split</h2>
-    <canvas id="genderChart" height="180"></canvas>
-    <div class="mt-4 flex justify-center gap-4 text-xs">
+    <div class="relative mx-auto h-52 w-full max-w-[240px] overflow-hidden sm:h-60 sm:max-w-[260px]">
+      <canvas id="genderChart"></canvas>
+    </div>
+    <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs">
       {% for label in chart_gender_labels %}
         <span class="flex items-center gap-2">
           <span class="inline-block h-2 w-2 rounded-full" style="background:{% cycle '#6366f1' '#22d3ee' '#a78bfa' '#f59e0b' %}"></span>
@@ -75,9 +90,12 @@
   </div>
 </div>
 
-<div class="mt-6 card p-6">
+<!-- Students per class -->
+<div class="card mt-6 p-4 sm:p-6">
   <h2 class="mb-4 font-semibold">Students per class</h2>
-  <canvas id="classChart" height="90"></canvas>
+  <div class="relative h-56 w-full overflow-hidden sm:h-72">
+    <canvas id="classChart"></canvas>
+  </div>
 </div>
 
 <!-- ================= Chart.js ================= -->
@@ -104,7 +122,7 @@
     },
     options: {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } },
@@ -126,6 +144,7 @@
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       cutout: '62%',
       plugins: { legend: { display: false } }
     }
@@ -146,10 +165,24 @@
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         y: { beginAtZero: true, ticks: { precision: 0 } },
-        x: { grid: { display: false } }
+        x: {
+          grid: { display: false },
+          ticks: {
+            autoSkip: false,
+            maxRotation: 45,
+            minRotation: 45,
+            font: { size: 9 },
+            callback: function(value) {
+              const label = this.getLabelForValue(value);
+              const m = label.match(/Class (\d+) - ([A-Z])/);
+              return m ? 'Class ' + m[1] + '-' + m[2] : label;
+            }
+          }
+        }
       }
     }
   });

@@ -3,40 +3,33 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{% block title %}School Monitor{% endblock %}</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-  <style>
-    .btn-primary { @apply inline-flex items-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700; }
-    .btn-light   { @apply inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50; }
-    .card        { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
-    .input       { @apply w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500; }
-    .th          { @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500; }
-    .td          { @apply px-4 py-3 text-sm text-slate-700; }
-    .badge       { @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium; }
-  </style>
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-900">
 
   <div class="flex min-h-screen">
 
-    <!-- Sidebar -->
-    <aside class="hidden w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-900 text-slate-100 lg:flex">
-      <div class="flex h-16 items-center gap-2 border-b border-slate-800 px-5">
+    <!-- Desktop + tablet sidebar (hidden on phones) -->
+    <aside class="hidden md:flex w-16 lg:w-64 shrink-0 flex-col border-r border-slate-800 bg-slate-900 text-slate-100">
+      <div class="flex h-16 items-center justify-center lg:justify-start lg:px-5 gap-2 border-b border-slate-800">
         <i class="fa-solid fa-school text-indigo-400"></i>
-        <span class="font-semibold tracking-tight">School Monitor</span>
+        <span class="hidden lg:inline font-semibold tracking-tight">School Monitor</span>
       </div>
+
       <nav class="flex-1 overflow-y-auto py-3">
         {% block nav %}{% endblock %}
       </nav>
-      <div class="border-t border-slate-800 p-4">
-        <div class="mb-2 text-xs text-slate-400">
+
+      <div class="hidden lg:block border-t border-slate-800 p-4">
+        <div class="mb-2 text-xs text-slate-400 truncate">
           Signed in as <span class="font-medium text-slate-200">{{ request.user.display_name }}</span>
         </div>
-        <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+        <form method="post" action="{% url 'accounts:logout' %}">
           {% csrf_token %}
           <button type="submit"
                   class="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white">
@@ -47,40 +40,85 @@
       </div>
     </aside>
 
-    <!-- Main -->
+    <!-- Main column -->
     <div class="flex min-w-0 flex-1 flex-col">
+
       <!-- Mobile top bar -->
-      <header class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 lg:hidden">
-        <button id="menu-toggle" class="rounded-md p-2 hover:bg-slate-100">
-          <i class="fa-solid fa-bars"></i>
+      <header class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 md:hidden">
+        <button id="mobile-menu-open" class="rounded-md p-2 hover:bg-slate-100" aria-label="Open menu">
+          <i class="fa-solid fa-bars text-lg"></i>
         </button>
         <span class="font-semibold">School Monitor</span>
         <form method="post" action="{% url 'accounts:logout' %}">
           {% csrf_token %}
-          <button type="submit" class="rounded-md p-2 text-slate-600 hover:bg-slate-100" title="Log out">
-            <i class="fa-solid fa-right-from-bracket"></i>
+          <button type="submit" class="rounded-md p-2 text-slate-600 hover:bg-slate-100" aria-label="Log out">
+            <i class="fa-solid fa-right-from-bracket text-lg"></i>
           </button>
         </form>
       </header>
 
-      <!-- Mobile sidebar drawer -->
-      <div id="mobile-nav" class="hidden border-b border-slate-800 bg-slate-900 text-slate-100 lg:hidden">
-        <nav class="py-3">{% block nav_mobile %}{% endblock %}</nav>
+      <!-- Mobile drawer -->
+      <div id="mobile-menu-drawer" class="hidden fixed inset-0 z-50 md:hidden">
+        <div class="absolute inset-0 bg-black/40" id="mobile-menu-backdrop"></div>
+        <aside class="relative z-10 flex h-full w-72 max-w-[85vw] flex-col bg-slate-900 text-slate-100">
+          <div class="flex h-16 items-center justify-between border-b border-slate-800 px-4">
+            <span class="font-semibold">Menu</span>
+            <button id="mobile-menu-close" class="rounded p-2 hover:bg-slate-800" aria-label="Close menu">
+              <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+          </div>
+          <nav class="flex-1 overflow-y-auto py-3">
+            {% block nav_mobile %}{% endblock %}
+          </nav>
+          <div class="border-t border-slate-800 p-4 text-xs text-slate-400 truncate">
+            Signed in as <span class="text-slate-200">{{ request.user.display_name }}</span>
+          </div>
+        </aside>
       </div>
 
-      <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 lg:px-8">
+      <!-- Page content -->
+      <main class="mx-auto w-full max-w-7xl flex-1 px-4 pb-24 pt-6 lg:px-8 md:pb-6 md:pt-6">
         {% include "partials/messages.html" %}
         {% block content %}{% endblock %}
       </main>
+
+      <!-- Mobile bottom tab bar -->
+      <nav class="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white md:hidden">
+        <div class="grid grid-cols-5 text-xs">
+          <a href="{% url 'dashboard:home' %}" class="flex flex-col items-center gap-1 py-2 text-slate-600 hover:text-indigo-600">
+            <i class="fa-solid fa-house"></i><span>Home</span>
+          </a>
+          <a href="{% url 'students:my_students' %}" class="flex flex-col items-center gap-1 py-2 text-slate-600 hover:text-indigo-600">
+            <i class="fa-solid fa-user-graduate"></i><span>Students</span>
+          </a>
+          <a href="{% url 'academics:attendance_list' %}" class="flex flex-col items-center gap-1 py-2 text-slate-600 hover:text-indigo-600">
+            <i class="fa-solid fa-clipboard-user"></i><span>Attend</span>
+          </a>
+          <a href="{% url 'academics:marks_overview' %}" class="flex flex-col items-center gap-1 py-2 text-slate-600 hover:text-indigo-600">
+            <i class="fa-solid fa-table-list"></i><span>Marks</span>
+          </a>
+          <button id="mobile-menu-open-2" class="flex flex-col items-center gap-1 py-2 text-slate-600 hover:text-indigo-600">
+            <i class="fa-solid fa-bars"></i><span>More</span>
+          </button>
+        </div>
+      </nav>
     </div>
   </div>
 
   <script>
-    const toggle = document.getElementById('menu-toggle');
-    const drawer = document.getElementById('mobile-nav');
-    if (toggle && drawer) {
-      toggle.addEventListener('click', () => drawer.classList.toggle('hidden'));
-    }
+    const openBtn1 = document.getElementById('mobile-menu-open');
+    const openBtn2 = document.getElementById('mobile-menu-open-2');
+    const closeBtn = document.getElementById('mobile-menu-close');
+    const backdrop = document.getElementById('mobile-menu-backdrop');
+    const drawer   = document.getElementById('mobile-menu-drawer');
+
+    function openDrawer() { drawer.classList.remove('hidden'); }
+    function closeDrawer() { drawer.classList.add('hidden'); }
+
+    openBtn1?.addEventListener('click', openDrawer);
+    openBtn2?.addEventListener('click', openDrawer);
+    closeBtn?.addEventListener('click', closeDrawer);
+    backdrop?.addEventListener('click', closeDrawer);
   </script>
 
   {% block extra_js %}{% endblock %}

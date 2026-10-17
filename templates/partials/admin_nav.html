@@ -1,0 +1,31 @@
+{% url 'dashboard:admin' as u %}{% include "partials/nav_item.html" with url=u icon="fa-gauge" label="Dashboard" show_label=show_label %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">People</p>
+{% url 'accounts:user_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-users" label="Users" show_label=show_label %}
+{% url 'accounts:teacher_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-chalkboard-user" label="Teachers" show_label=show_label %}
+{% url 'students:my_students' as u %}{% include "partials/nav_item.html" with url=u icon="fa-user-graduate" label="Students" show_label=show_label %}
+{% url 'students:manage_students' as u %}{% include "partials/nav_item.html" with url=u icon="fa-user-pen" label="Manage students" show_label=show_label %}
+{% url 'accounts:link_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-link" label="Parent links" show_label=show_label %}
+{% url 'students:class_id_cards_page' as u %}{% include "partials/nav_item.html" with url=u icon="fa-id-card" label="Class ID cards" show_label=show_label %}
+{% url 'students:transfer_certificate_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-file-export" label="Transfer certificates" show_label=show_label %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">Academics</p>
+{% url 'students:class_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-chalkboard" label="Classes" show_label=show_label %}
+{% url 'students:subject_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-book" label="Subjects" show_label=show_label %}
+{% url 'academics:exam_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-file-pen" label="Exams" show_label=show_label %}
+{% url 'academics:examtype_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-list-check" label="Exam types" show_label=show_label %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">Oversight</p>
+{% url 'academics:attendance_mark' as u %}{% include "partials/nav_item.html" with url=u icon="fa-clipboard-user" label="Mark attendance" show_label=show_label %}
+{% url 'academics:attendance_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-check" label="Attendance history" show_label=show_label %}
+{% url 'academics:marks_overview' as u %}{% include "partials/nav_item.html" with url=u icon="fa-table-list" label="Marksheets" show_label=show_label %}
+{% url 'academics:reportcards_manage' as u %}{% include "partials/nav_item.html" with url=u icon="fa-file-pdf" label="Report cards" show_label=show_label %}
+{% url 'academics:admit_cards_bulk_page' as u %}{% include "partials/nav_item.html" with url=u icon="fa-id-badge" label="Admit cards" show_label=show_label %}
+{% url 'academics:merit_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-ranking-star" label="Merit list" show_label=show_label %}
+{% url 'academics:leave_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-day" label="Leave applications" show_label=show_label %}
+{% url 'academics:audit_log' as u %}{% include "partials/nav_item.html" with url=u icon="fa-clock-rotate-left" label="Audit log" show_label=show_label %}
+{% url 'accounts:login_history' as u %}{% include "partials/nav_item.html" with url=u icon="fa-right-to-bracket" label="Login history" show_label=show_label %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">Settings</p>
+{% url 'academics:year_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar" label="Academic years" show_label=show_label %}
+{% url 'academics:scale_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-ranking-star" label="Grading scale" show_label=show_label %}

@@ -17,7 +17,8 @@ from .permissions import RoleBasedAccessMixin
 
 def build_crud(*, ns, name, slug, model_class, form_cls, title, singular, columns,
                search_fields=(), select_related=(), ordering=None,
-               allow_update=True, can_delete=None):
+               allow_update=True, allow_create=True, allow_delete=True,
+               can_delete=None, base_queryset=None):
     list_name = f"{ns}:{name}_list"
     admin_only = (User.Role.ADMIN,)
 
@@ -28,7 +29,7 @@ def build_crud(*, ns, name, slug, model_class, form_cls, title, singular, column
         paginate_by = 15
 
         def get_queryset(self):
-            qs = model_class.objects.all()
+            qs = base_queryset if base_queryset is not None else model_class.objects.all()
             if select_related:
                 qs = qs.select_related(*select_related)
             if ordering:
@@ -47,9 +48,9 @@ def build_crud(*, ns, name, slug, model_class, form_cls, title, singular, column
             params.pop("page", None)
             ctx.update(
                 title=title, singular=singular, columns=columns,
-                create_url=reverse(f"{ns}:{name}_create"),
+                create_url=reverse(f"{ns}:{name}_create") if allow_create else "",
                 update_name=f"{ns}:{name}_update" if allow_update else "",
-                delete_name=f"{ns}:{name}_delete",
+                delete_name=f"{ns}:{name}_delete" if allow_delete else "",
                 q=self.request.GET.get("q", ""), searchable=bool(search_fields),
                 qs=params.urlencode(),
             )
@@ -105,10 +106,13 @@ def build_crud(*, ns, name, slug, model_class, form_cls, title, singular, column
             messages.success(self.request, f"{singular} deleted.")
             return response
 
-    urls = [path(f"{slug}/", CrudList.as_view(), name=f"{name}_list"),
-            path(f"{slug}/new/", CrudCreate.as_view(), name=f"{name}_create"),
-            path(f"{slug}/<int:pk>/delete/", CrudDelete.as_view(), name=f"{name}_delete")]
+    urls = [path(f"{slug}/", CrudList.as_view(), name=f"{name}_list")]
+    if allow_create:
+        urls.append(path(f"{slug}/new/", CrudCreate.as_view(), name=f"{name}_create"))
     if allow_update:
         urls.append(path(f"{slug}/<int:pk>/edit/", CrudUpdate.as_view(), name=f"{name}_update"))
+    if allow_delete:
+        urls.append(path(f"{slug}/<int:pk>/delete/", CrudDelete.as_view(), name=f"{name}_delete"))
+
     return SimpleNamespace(list=CrudList, create=CrudCreate, update=CrudUpdate,
                            delete=CrudDelete, urls=urls)

@@ -1,28 +1,35 @@
 {% extends base_template %}
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
+
 <div class="mx-auto max-w-2xl">
   <h1 class="mb-6 text-2xl font-bold">{{ title }}</h1>
-  <form method="post" enctype="multipart/form-data" class="card space-y-5 p-6">{% csrf_token %}
+  <form method="post" enctype="multipart/form-data" class="card space-y-5 p-4 sm:p-6">
+    {% csrf_token %}
     {% if form.non_field_errors %}
-    <div class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ form.non_field_errors }}</div>
+      <div class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ form.non_field_errors }}</div>
     {% endif %}
+
     {% for field in form %}
-    <div>
-      {% if field.field.widget.input_type == 'checkbox' %}
-      <label class="flex items-center gap-2 text-sm font-medium">{{ field }} {{ field.label }}</label>
-      {% else %}
-      <label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium">{{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}</label>
-      {{ field }}
-      {% endif %}
-      {% if field.help_text %}<p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>{% endif %}
-      {% for error in field.errors %}<p class="mt-1 text-xs font-medium text-red-600">{{ error }}</p>{% endfor %}
-    </div>
+      <div>
+        {% if field.field.widget.input_type == 'checkbox' %}
+          <label class="flex items-center gap-2 text-sm font-medium">{{ field }} {{ field.label }}</label>
+        {% else %}
+          <label for="{{ field.id_for_label }}" class="mb-1 block text-sm font-medium">
+            {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+          </label>
+          {{ field }}
+        {% endif %}
+        {% if field.help_text %}<p class="mt-1 text-xs text-slate-500">{{ field.help_text }}</p>{% endif %}
+        {% for error in field.errors %}<p class="mt-1 text-xs font-medium text-red-600">{{ error }}</p>{% endfor %}
+      </div>
     {% endfor %}
-    <div class="flex gap-3 pt-2">
-      <button class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+
+    <div class="sticky bottom-0 flex gap-3 bg-white/90 pt-3 pb-2 backdrop-blur supports-[backdrop-filter]:bg-white/75">
+      <button class="btn-primary flex-1 sm:flex-none"><i class="fa-solid fa-floppy-disk"></i> Save</button>
       <a href="{{ cancel_url }}" class="btn-light">Cancel</a>
     </div>
   </form>
 </div>
+
 {% endblock %}

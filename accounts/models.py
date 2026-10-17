@@ -4,6 +4,10 @@ from django.db import models
 from django.utils import timezone
 
 
+# This username can never be deleted or deactivated by anyone.
+PRIMARY_ADMIN_USERNAME = "admin"
+
+
 class User(AbstractUser):
     """Custom user with a single role that drives all permissions."""
 
@@ -26,6 +30,11 @@ class User(AbstractUser):
     def display_name(self):
         return self.get_full_name() or self.username
 
+    @property
+    def is_primary_admin(self):
+        """True for the one protected account that nobody can delete or deactivate."""
+        return self.username == PRIMARY_ADMIN_USERNAME
+
     def __str__(self):
         return f"{self.display_name} ({self.get_role_display()})"
 
@@ -40,8 +49,24 @@ class ParentProfile(models.Model):
 
 
 class TeacherProfile(models.Model):
+    class Designation(models.TextChoices):
+        PRINCIPAL = "PRINCIPAL", "Principal"
+        VICE_PRINCIPAL = "VICE_PRINCIPAL", "Vice Principal"
+        HEAD_OF_DEPT = "HEAD_OF_DEPT", "Head of Department"
+        SENIOR_TEACHER = "SENIOR_TEACHER", "Senior Teacher"
+        ASSISTANT_TEACHER = "ASSISTANT_TEACHER", "Assistant Teacher"
+        LECTURER = "LECTURER", "Lecturer"
+        INSTRUCTOR = "INSTRUCTOR", "Instructor"
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_profile")
     subject_specialization = models.CharField(max_length=100, blank=True)
+    designation = models.CharField(
+        max_length=30,
+        choices=Designation.choices,
+        default=Designation.ASSISTANT_TEACHER,
+        blank=True,
+        help_text="Select the teacher's role.",
+    )
     phone = models.CharField(max_length=30, blank=True)
 
     def __str__(self):
@@ -49,11 +74,7 @@ class TeacherProfile(models.Model):
 
 
 class LoginHistory(models.Model):
-    """Records every successful login for the audit trail.
-
-    Populated by a signal handler in accounts/signals.py, not by the middleware —
-    the login event fires only once per successful auth, which is exactly what we want.
-    """
+    """Records every successful login for the audit trail."""
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

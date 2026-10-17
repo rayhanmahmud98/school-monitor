@@ -1,0 +1,135 @@
+{% extends base_template %}
+{% block title %}Manage students{% endblock %}
+{% block content %}
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+  <div>
+    <h1 class="text-2xl font-bold">Manage students</h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Students grouped by class. Maximum per class is set on each Class record.
+    </p>
+  </div>
+  <a href="{% url 'students:student_create' %}" class="btn-primary">
+    <i class="fa-solid fa-user-plus"></i> Add student
+  </a>
+</div>
+
+<form method="get" class="card mb-4 grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div>
+    <label class="mb-1 block text-xs font-medium text-slate-500">Find a student</label>
+    <input name="q" value="{{ q }}" placeholder="Name, ID, roll, or guardian" class="input w-full">
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-slate-500">Jump to class</label>
+    <select name="class" class="input w-full">
+      <option value="">All classes</option>
+      {% for c in all_classes %}
+        <option value="{{ c.pk }}" {% if class_id == c.pk|stringformat:"s" %}selected{% endif %}>{{ c }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="mb-1 block text-xs font-medium text-slate-500">Sort by</label>
+    <select name="sort" class="input w-full">
+      {% for key, label in sort_options %}
+        <option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="flex items-end gap-2">
+    <button class="btn-primary"><i class="fa-solid fa-filter"></i> Apply</button>
+    {% if q or class_id or sort != 'class' %}<a href="?" class="btn-light">Reset</a>{% endif %}
+  </div>
+</form>
+
+{% for g in groups %}
+  <div class="card mb-4 overflow-hidden">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-4 sm:px-6">
+      <div>
+        <h2 class="text-lg font-semibold">{{ g.cls }}</h2>
+        <p class="mt-0.5 text-xs text-slate-500">Academic year {{ g.cls.academic_year }}</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="text-sm text-slate-600">
+          <strong>{{ g.active }}</strong> / {{ g.max }} seats
+        </span>
+        {% if g.is_full %}
+          <span class="badge bg-red-100 text-red-800">Full</span>
+        {% elif g.remaining <= 3 %}
+          <span class="badge bg-amber-100 text-amber-800">{{ g.remaining }} left</span>
+        {% else %}
+          <span class="badge bg-green-100 text-green-800">{{ g.remaining }} left</span>
+        {% endif %}
+        <a href="{% url 'students:class_update' g.cls.pk %}" class="btn-light !py-1">
+          <i class="fa-solid fa-pen"></i> Edit class
+        </a>
+      </div>
+    </div>
+
+    <div class="h-1 bg-slate-100">
+      <div class="h-full {% if g.is_full %}bg-red-500{% elif g.remaining <= 3 %}bg-amber-500{% else %}bg-green-500{% endif %}"
+           style="width: {% widthratio g.active g.max 100 %}%"></div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="min-w-full divide-y divide-slate-200 card-stack">
+        <thead class="bg-slate-50">
+          <tr>
+            <th class="th">Roll</th>
+            <th class="th">Student ID</th>
+            <th class="th">Name</th>
+            <th class="th">Guardian</th>
+            <th class="th">Contact</th>
+            <th class="th">Status</th>
+            <th class="th text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for s in g.students %}
+            <tr class="hover:bg-slate-50">
+              <td class="td" data-label="Roll">{{ s.roll_no }}</td>
+              <td class="td font-mono text-xs text-slate-500" data-label="Student ID">{{ s.student_id|default:"—" }}</td>
+              <td class="td font-medium" data-label="Name">{{ s.full_name }}</td>
+              <td class="td" data-label="Guardian">{{ s.guardian_name }}</td>
+              <td class="td" data-label="Contact">{{ s.contact }}</td>
+              <td class="td" data-label="Status">
+                {% if s.is_active %}
+                  <span class="badge bg-green-100 text-green-800">Active</span>
+                {% else %}
+                  <span class="badge bg-slate-100 text-slate-600">Inactive</span>
+                {% endif %}
+              </td>
+              <td class="td whitespace-nowrap text-right" data-label="Actions">
+                <a href="{% url 'students:student_update' s.pk %}"
+                   class="text-indigo-600 hover:underline mr-3">Edit</a>
+                <a href="{% url 'students:student_delete' s.pk %}"
+                   class="text-red-600 hover:underline mr-3">Delete</a>
+                <a href="{% url 'students:student_documents' s.pk %}"
+                   class="text-slate-600 hover:underline" title="Documents">
+                  <i class="fa-solid fa-folder-open"></i>
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="7" class="px-4 py-6 text-center text-slate-500">
+                {% if q %}No students match "{{ q }}" in this class.
+                {% else %}No students in this class yet.{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% empty %}
+  <div class="card p-10 text-center text-slate-500">
+    {% if q or class_id %}
+      No classes match your filters.
+    {% else %}
+      No classes have been created yet.
+    {% endif %}
+  </div>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,11 @@
+{% url 'dashboard:teacher' as u %}{% include "partials/nav_item.html" with url=u icon="fa-gauge" label="Dashboard" show_label=show_label %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">Teaching</p>
+{% url 'students:my_students' as u %}{% include "partials/nav_item.html" with url=u icon="fa-user-graduate" label="My students" show_label=show_label %}
+{% url 'academics:attendance_mark' as u %}{% include "partials/nav_item.html" with url=u icon="fa-clipboard-user" label="Mark attendance" show_label=show_label %}
+{% url 'academics:attendance_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-check" label="Attendance history" show_label=show_label %}
+{% url 'academics:marks_overview' as u %}{% include "partials/nav_item.html" with url=u icon="fa-table-list" label="Marksheets" show_label=show_label %}
+{% url 'academics:merit_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-ranking-star" label="Merit list" show_label=show_label %}
+
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">My leave</p>
+{% url 'academics:leave_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-day" label="Leave" show_label=show_label %}

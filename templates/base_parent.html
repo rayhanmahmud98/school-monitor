@@ -1,8 +1,9 @@
 {% extends "base.html" %}
+
 {% block nav %}
-{% url 'dashboard:parent' as u %}{% include "partials/nav_item.html" with url=u icon="fa-gauge" label="Dashboard" %}
-{% url 'academics:parent_attendance' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-check" label="Attendance" %}
-{% url 'academics:parent_marks' as u %}{% include "partials/nav_item.html" with url=u icon="fa-table-list" label="Marks" %}
-{% url 'academics:parent_reportcards' as u %}{% include "partials/nav_item.html" with url=u icon="fa-file-pdf" label="Report cards" %}
-{% url 'academics:leave_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-day" label="Leave" %}
+  {% include "partials/parent_nav.html" with show_label=0 %}
+{% endblock %}
+
+{% block nav_mobile %}
+  {% include "partials/parent_nav.html" with show_label=1 %}
 {% endblock %}

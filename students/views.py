@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -306,5 +306,71 @@ def transfer_certificate_list(request):
     return render(request, "students/transfer_certificate_list.html", {
         "page_obj": page_obj,
         "qs": querystring,
+        "q": q,
+    })
+
+
+
+# ==============================================================================
+# MANAGE STUDENTS (admin: grouped by class with seat counts)
+# ==============================================================================
+@role_required(ADMIN)
+def manage_students(request):
+    """Admin: students grouped by class, with sort and filter options."""
+    class_id = request.GET.get("class", "").strip()
+    q = request.GET.get("q", "").strip()
+    sort = request.GET.get("sort", "class").strip()
+
+    classes_qs = Class.objects.annotate(
+        total_students=Count("students", filter=Q(students__is_active=True)),
+    ).order_by("name", "section")
+
+    if class_id.isdigit():
+        classes_qs = classes_qs.filter(pk=class_id)
+
+    SORTS = {
+        "class":       ("Class, then roll no.", ("class_ref__name", "class_ref__section", "roll_no")),
+        "name":        ("Name (A-Z)", ("full_name",)),
+        "name_desc":   ("Name (Z-A)", ("-full_name",)),
+        "roll":        ("Roll number", ("roll_no",)),
+        "student_id":  ("Student ID", ("student_id",)),
+        "newest":      ("Newest admitted first", ("-admission_date", "full_name")),
+    }
+    if sort not in SORTS:
+        sort = "class"
+    _, order_by = SORTS[sort]
+
+    groups = []
+    for cls in classes_qs:
+        students_qs = cls.students.select_related("class_ref").order_by(*order_by)
+        if q:
+            students_qs = students_qs.filter(
+                Q(full_name__icontains=q)
+                | Q(student_id__icontains=q)
+                | Q(guardian_name__icontains=q)
+                | Q(roll_no__icontains=q)
+            )
+        groups.append({
+            "cls": cls,
+            "students": students_qs,
+            "active": cls.total_students,
+            "max": cls.max_students,
+            "remaining": max(cls.max_students - cls.total_students, 0),
+            "is_full": cls.total_students >= cls.max_students,
+        })
+
+    return render(request, "students/manage_students.html", {
+        "groups": groups,
+        "all_classes": Class.objects.order_by("name", "section"),
+        "class_id": class_id,
+        "q": q,
+        "sort": sort,
+        "sort_options": [(key, label) for key, (label, _) in SORTS.items()],
+    })
+
+    return render(request, "students/manage_students.html", {
+        "groups": groups,
+        "all_classes": Class.objects.order_by("name", "section"),
+        "class_id": class_id,
         "q": q,
     })
