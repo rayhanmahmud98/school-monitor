@@ -1,8 +1,8 @@
-asgiref==3.12.1
-charset-normalizer==3.5.2
-Django==5.2.18
-pillow==12.3.0
-pypdf==6.20.1
-reportlab==5.0.1
-sqlparse==0.6.0
-tzdata==2026.5
+Django
+reportlab
+Pillow
+pypdf
+dj-database-url
+psycopg2-binary
+whitenoise
+gunicornhttps://chat.deepseek.com/a/chat/s/2aae0978-31e8-4ab7-b35f-07b9e11ec936
