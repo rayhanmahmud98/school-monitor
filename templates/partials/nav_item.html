@@ -1,7 +1,6 @@
-{% load static %}
 <a href="{{ url }}"
-   class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors
-          {% if request.path == url %}bg-slate-800 text-white{% else %}text-slate-300 hover:bg-slate-800 hover:text-white{% endif %}">
-  <i class="fa-solid {{ icon }} w-4 shrink-0 text-center"></i>
-  <span class="{% if show_label %}inline{% else %}hidden lg:inline{% endif %} truncate">{{ label }}</span>
+   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+          {% if request.path == url %}bg-indigo-500 text-white shadow-md shadow-indigo-500/20{% else %}text-slate-400 hover:bg-slate-800 hover:text-white{% endif %}">
+  <i class="fa-solid {{ icon }} w-5 text-center {% if request.path == url %}text-white{% else %}text-slate-500{% endif %}"></i>
+  <span class="{% if show_label %}inline{% else %}hidden lg:inline{% endif %}">{{ label }}</span>
 </a>

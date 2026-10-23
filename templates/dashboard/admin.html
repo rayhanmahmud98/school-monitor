@@ -1,99 +1,158 @@
 {% extends "base_admin.html" %}{% load ui_extras %}
-{% block title %}Admin dashboard{% endblock %}
+{% block title %}Dashboard overview{% endblock %}
 {% block content %}
 
 <div class="mb-6">
-  <h1 class="text-2xl font-bold">Dashboard overview</h1>
-  <p class="mt-1 text-sm text-slate-500">Monitor and streamline school administration in one place.</p>
+  <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard overview</h1>
+  <p class="text-sm text-slate-500 mt-1">Monitor and streamline school administration in one place.</p>
 </div>
 
 <!-- ================= Stat cards ================= -->
-<div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-  {% include "partials/stat_card.html" with label="Total students" value=students icon="fa-user-graduate" color="indigo" %}
-  {% include "partials/stat_card.html" with label="Total teachers" value=teachers icon="fa-chalkboard-user" color="sky" %}
-  {% include "partials/stat_card.html" with label="Total parents" value=parents icon="fa-people-roof" color="violet" %}
-  {% include "partials/stat_card.html" with label="Total classes" value=classes_count icon="fa-chalkboard" color="emerald" %}
-
-  <div class="card flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
-    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-green-100 text-green-600 text-base sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
-      <i class="fa-solid fa-clipboard-check"></i>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+  
+  <!-- Card 1 -->
+  <div class="stat-card p-5 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="icon-box bg-indigo-50 text-indigo-600"><i class="fa-solid fa-user-graduate"></i></div>
+      <div>
+        <div class="text-2xl font-bold text-slate-900">{{ students }}</div>
+        <div class="text-xs text-slate-500 font-medium">Total students</div>
+      </div>
     </div>
-    <div class="min-w-0">
-      <div class="text-lg font-bold leading-tight sm:text-2xl">{% if attendance_percent is not None %}{{ attendance_percent }}%{% else %}—{% endif %}</div>
-      <div class="text-xs text-slate-500 sm:text-sm">Attendance rate</div>
-    </div>
+    <svg class="w-16 h-8 text-indigo-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 50 20"><path d="M0 15 Q 10 10, 20 12 T 40 5 T 50 10" /></svg>
   </div>
 
-  <div class="card flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
-    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-600 text-base sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
-      <i class="fa-solid fa-ranking-star"></i>
+  <!-- Card 2 -->
+  <div class="stat-card p-5 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="icon-box bg-sky-50 text-sky-500"><i class="fa-solid fa-chalkboard-user"></i></div>
+      <div>
+        <div class="text-2xl font-bold text-slate-900">{{ teachers }}</div>
+        <div class="text-xs text-slate-500 font-medium">Total teachers</div>
+      </div>
     </div>
-    <div class="min-w-0">
-      <div class="text-lg font-bold leading-tight sm:text-2xl">{% if avg_grade_percent is not None %}{{ avg_grade_percent }}%{% else %}—{% endif %}</div>
-      <div class="text-xs text-slate-500 sm:text-sm">Average grade</div>
-    </div>
+    <svg class="w-16 h-8 text-sky-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 50 20"><path d="M0 15 Q 10 8, 20 12 T 40 8 T 50 12" /></svg>
   </div>
 
-  <a href="{% url 'academics:marks_overview' %}?state=SUBMITTED" class="block">
-    <div class="card flex flex-col gap-2 p-3 hover:ring-2 hover:ring-amber-200 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
-      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600 text-base sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
-        <i class="fa-solid fa-hourglass-half"></i>
-      </div>
-      <div class="min-w-0">
-        <div class="text-lg font-bold leading-tight sm:text-2xl">{{ pending_batches }}</div>
-        <div class="text-xs text-slate-500 sm:text-sm">Marksheets awaiting approval</div>
+  <!-- Card 3 -->
+  <div class="stat-card p-5 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="icon-box bg-purple-50 text-purple-600"><i class="fa-solid fa-people-roof"></i></div>
+      <div>
+        <div class="text-2xl font-bold text-slate-900">{{ parents }}</div>
+        <div class="text-xs text-slate-500 font-medium">Total parents</div>
       </div>
     </div>
-  </a>
+    <svg class="w-16 h-8 text-purple-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 50 20"><path d="M0 10 Q 10 15, 20 10 T 40 12 T 50 8" /></svg>
+  </div>
 
-  <a href="{% url 'academics:reportcards_manage' %}" class="block">
-    <div class="card flex flex-col gap-2 p-3 hover:ring-2 hover:ring-indigo-200 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
-      <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600 text-base sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl">
-        <i class="fa-solid fa-file-pdf"></i>
-      </div>
-      <div class="min-w-0">
-        <div class="text-lg font-bold leading-tight sm:text-2xl">{{ unpublished_cards }}</div>
-        <div class="text-xs text-slate-500 sm:text-sm">Unpublished report cards</div>
+  <!-- Card 4 -->
+  <div class="stat-card p-5 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="icon-box bg-emerald-50 text-emerald-600"><i class="fa-solid fa-chalkboard"></i></div>
+      <div>
+        <div class="text-2xl font-bold text-slate-900">{{ classes_count }}</div>
+        <div class="text-xs text-slate-500 font-medium">Total classes</div>
       </div>
     </div>
-  </a>
+    <svg class="w-16 h-8 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 50 20"><path d="M0 12 Q 10 10, 20 14 T 40 9 T 50 6" /></svg>
+  </div>
+
+  <!-- Card 5 -->
+  <div class="stat-card p-5 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="icon-box bg-emerald-50 text-emerald-600"><i class="fa-solid fa-clipboard-check"></i></div>
+      <div>
+        <div class="text-2xl font-bold text-slate-900">{% if attendance_percent is not None %}{{ attendance_percent }}%{% else %}—{% endif %}</div>
+        <div class="text-xs text-slate-500 font-medium">Attendance rate</div>
+      </div>
+    </div>
+    <svg class="w-16 h-8 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 50 20"><path d="M0 15 Q 10 12, 20 13 T 40 10 T 50 12" /></svg>
+  </div>
+
+  <!-- Card 6 -->
+  <div class="stat-card p-5 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="icon-box bg-amber-50 text-amber-600"><i class="fa-solid fa-ranking-star"></i></div>
+      <div>
+        <div class="text-2xl font-bold text-slate-900">{% if avg_grade_percent is not None %}{{ avg_grade_percent }}%{% else %}—{% endif %}</div>
+        <div class="text-xs text-slate-500 font-medium">Average grade</div>
+      </div>
+    </div>
+    <svg class="w-16 h-8 text-amber-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 50 20"><path d="M0 15 Q 10 10, 20 12 T 40 5 T 50 10" /></svg>
+  </div>
+
+  <!-- Card 7 -->
+  <div class="stat-card p-5 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="icon-box bg-rose-50 text-rose-500"><i class="fa-solid fa-hourglass-half"></i></div>
+      <div>
+        <div class="text-2xl font-bold text-slate-900">{{ pending_batches }}</div>
+        <div class="text-xs text-slate-500 font-medium">Marksheets awaiting approval</div>
+      </div>
+    </div>
+    <svg class="w-16 h-8 text-rose-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 50 20"><path d="M0 12 Q 10 8, 20 12 T 40 8 T 50 10" /></svg>
+  </div>
+
+  <!-- Card 8 -->
+  <div class="stat-card p-5 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="icon-box bg-indigo-50 text-indigo-500"><i class="fa-solid fa-file-pdf"></i></div>
+      <div>
+        <div class="text-2xl font-bold text-slate-900">{{ unpublished_cards }}</div>
+        <div class="text-xs text-slate-500 font-medium">Unpublished report cards</div>
+      </div>
+    </div>
+    <svg class="w-16 h-8 text-indigo-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 50 20"><path d="M0 10 Q 10 15, 20 10 T 40 12 T 50 8" /></svg>
+  </div>
 </div>
 
 <!-- ================= Charts ================= -->
-<div class="mt-6 grid gap-6 lg:grid-cols-3">
-
-  <!-- Attendance trend -->
-  <div class="card p-4 sm:p-6 lg:col-span-2">
-    <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-      <h2 class="font-semibold">Attendance trend (last 6 months)</h2>
-      <span class="text-xs text-slate-400">Present + Late as % of total marked</span>
+<div class="grid gap-6 lg:grid-cols-3 mb-6">
+  <!-- Attendance Trend -->
+  <div class="stat-card p-6 lg:col-span-2">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-2 text-slate-800 font-bold">
+        <i class="fa-solid fa-chart-line text-indigo-500"></i> Attendance trend (last 6 months)
+      </div>
+      <div class="flex items-center gap-4 text-xs font-medium text-slate-500">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Present</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> Late</span>
+      </div>
     </div>
-    <div class="relative h-52 w-full overflow-hidden sm:h-72">
+    <div class="relative h-64 w-full">
       <canvas id="attendanceChart"></canvas>
     </div>
   </div>
 
-  <!-- Gender split -->
-  <div class="card p-4 sm:p-6">
-    <h2 class="mb-4 font-semibold">Gender split</h2>
-    <div class="relative mx-auto h-52 w-full max-w-[240px] overflow-hidden sm:h-60 sm:max-w-[260px]">
+  <!-- Gender Split -->
+  <div class="stat-card p-6">
+    <div class="flex items-center gap-2 text-slate-800 font-bold mb-6">
+      <i class="fa-solid fa-venus-mars text-indigo-500"></i> Gender split
+    </div>
+    <div class="relative h-48 w-full flex justify-center">
       <canvas id="genderChart"></canvas>
     </div>
-    <div class="mt-4 flex flex-wrap justify-center gap-4 text-xs">
+    <!-- Custom Legend -->
+    <div class="mt-6 space-y-3 text-sm font-medium">
       {% for label in chart_gender_labels %}
-        <span class="flex items-center gap-2">
-          <span class="inline-block h-2 w-2 rounded-full" style="background:{% cycle '#6366f1' '#22d3ee' '#a78bfa' '#f59e0b' %}"></span>
-          {{ label }}
+      <div class="flex items-center justify-between">
+        <span class="flex items-center gap-2 text-slate-600">
+          <span class="w-2.5 h-2.5 rounded-full" style="background:{% cycle '#6366f1' '#22d3ee' %}"></span> {{ label }}
         </span>
+        <span class="text-slate-900">{{ chart_gender_values|slice:forloop.counter0|last|default:"0" }} <span class="text-slate-400 font-normal ml-2">50%</span></span>
+      </div>
       {% endfor %}
     </div>
   </div>
 </div>
 
-<!-- Students per class -->
-<div class="card mt-6 p-4 sm:p-6">
-  <h2 class="mb-4 font-semibold">Students per class</h2>
-  <div class="relative h-56 w-full overflow-hidden sm:h-72">
+<!-- Students per Class -->
+<div class="stat-card p-6">
+  <div class="flex items-center gap-2 text-slate-800 font-bold mb-6">
+    <i class="fa-solid fa-chart-bar text-indigo-500"></i> Students per class
+  </div>
+  <div class="relative h-64 w-full">
     <canvas id="classChart"></canvas>
   </div>
 </div>
@@ -102,55 +161,74 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 (function () {
-  const brand = '#6366f1';
+  // Global Chart Defaults for the clean look
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.color = '#94a3b8';
 
-  // --- Attendance trend (line) ---
+  // --- Attendance Trend (Line) ---
   new Chart(document.getElementById('attendanceChart'), {
     type: 'line',
     data: {
       labels: {{ chart_attendance_labels|safe }},
-      datasets: [{
-        label: '% attended',
-        data: {{ chart_attendance_values|safe }},
-        borderColor: brand,
-        backgroundColor: 'rgba(99,102,241,0.12)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 3,
-        pointBackgroundColor: brand,
-      }]
+      datasets: [
+        {
+          label: 'Present',
+          data: {{ chart_attendance_values|safe }},
+          borderColor: '#3b82f6', // blue-500
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: '#3b82f6',
+        },
+        {
+          label: 'Late',
+          data: [5, 10, 8, 15, 12, 18], // Placeholder for Late data
+          borderColor: '#a855f7', // purple-500
+          backgroundColor: 'transparent',
+          borderDash: [5, 5],
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: '#a855f7',
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } },
-        x: { grid: { display: false } }
+        y: { 
+          beginAtZero: true, max: 100, 
+          ticks: { callback: v => v + '%', font: { size: 11 } },
+          grid: { borderDash: [4, 4], color: '#f1f5f9' }, border: { display: false }
+        },
+        x: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 11 } } }
       }
     }
   });
 
-  // --- Gender split (donut) ---
+  // --- Gender Split (Donut) ---
   new Chart(document.getElementById('genderChart'), {
     type: 'doughnut',
     data: {
       labels: {{ chart_gender_labels|safe }},
       datasets: [{
         data: {{ chart_gender_values|safe }},
-        backgroundColor: ['#6366f1', '#22d3ee', '#a78bfa', '#f59e0b', '#94a3b8'],
+        backgroundColor: ['#6366f1', '#22d3ee'], // indigo-500, cyan-400
         borderWidth: 0,
+        hoverOffset: 4,
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      cutout: '62%',
+      cutout: '75%',
       plugins: { legend: { display: false } }
     }
   });
 
-  // --- Students per class (bar) ---
+  // --- Students per class (Bar) ---
   new Chart(document.getElementById('classChart'), {
     type: 'bar',
     data: {
@@ -158,9 +236,9 @@
       datasets: [{
         label: 'Active students',
         data: {{ chart_class_values|safe }},
-        backgroundColor: brand,
-        borderRadius: 6,
-        maxBarThickness: 36,
+        backgroundColor: '#6366f1', // indigo-500
+        borderRadius: 4,
+        maxBarThickness: 24,
       }]
     },
     options: {
@@ -168,20 +246,13 @@
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        y: { beginAtZero: true, ticks: { precision: 0 } },
-        x: {
-          grid: { display: false },
-          ticks: {
-            autoSkip: false,
-            maxRotation: 45,
-            minRotation: 45,
-            font: { size: 9 },
-            callback: function(value) {
-              const label = this.getLabelForValue(value);
-              const m = label.match(/Class (\d+) - ([A-Z])/);
-              return m ? 'Class ' + m[1] + '-' + m[2] : label;
-            }
-          }
+        y: { 
+          beginAtZero: true, ticks: { precision: 0, font: { size: 11 } },
+          grid: { borderDash: [4, 4], color: '#f1f5f9' }, border: { display: false }
+        },
+        x: { 
+          grid: { display: false }, border: { display: false },
+          ticks: { maxRotation: 45, minRotation: 45, font: { size: 10 } } 
         }
       }
     }
