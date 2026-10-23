@@ -82,25 +82,10 @@
           {% endif %}
         </td>
         <td class="td whitespace-nowrap text-right">
-          <a href="{% url 'students:student_documents' s.pk %}"
-             class="text-slate-600 hover:underline mr-3" title="Documents">
-            <i class="fa-solid fa-folder-open"></i> Docs
-          </a>
-          <a href="{% url 'students:student_id_card' s.pk %}"
-             class="text-slate-600 hover:underline mr-3" title="ID card (PDF)">
+          <a href="{% url 'students:student_profile' s.pk %}" class="text-slate-600 hover:underline mr-3">View</a>
+          <a href="{% url 'students:student_update' s.pk %}" class="text-indigo-600 hover:underline mr-3">Edit</a>
+          <a href="{% url 'students:student_id_card' s.pk %}" class="text-slate-600 hover:underline" title="Download ID Card">
             <i class="fa-solid fa-id-card"></i> ID
-          </a>
-          <a href="{% url 'students:transfer_certificate' s.pk %}"
-             class="text-slate-600 hover:underline mr-3" title="Transfer certificate">
-            <i class="fa-solid fa-file-export"></i> TC
-          </a>
-          <a href="{% url 'academics:student_progress_pdf' s.pk %}"
-             class="text-slate-600 hover:underline mr-3" title="Progress PDF">
-            <i class="fa-solid fa-file-pdf"></i> PDF
-          </a>
-          <a href="{% url 'academics:admit_card_page' s.pk %}"
-             class="text-slate-600 hover:underline" title="Admit card">
-            <i class="fa-solid fa-id-badge"></i> Admit
           </a>
         </td>
       </tr>

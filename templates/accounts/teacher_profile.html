@@ -1,0 +1,42 @@
+{% extends base_template %}
+{% block title %}Profile — {{ teacher.display_name }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-bold">{{ teacher.display_name }}</h1>
+    <p class="text-sm text-slate-500">
+      <strong>User ID: {{ teacher.username }}</strong> · 
+      {{ teacher.teacher_profile.designation|default:"Teacher" }} · 
+      Employee ID: {{ teacher.teacher_profile.employee_id|default:"-" }}
+    </p>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'accounts:teacher_update' teacher.pk %}" class="btn-light">
+      <i class="fa-solid fa-pen"></i> Edit
+    </a>
+    <a href="{% url 'accounts:teacher_id_card' teacher.pk %}" class="btn-primary">
+      <i class="fa-solid fa-id-card"></i> ID Card PDF
+    </a>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="card p-6 text-center">
+    {% if teacher.teacher_profile.photo %}
+      <img src="{{ teacher.teacher_profile.photo.url }}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4">
+    {% else %}
+      <div class="w-32 h-32 rounded-full bg-slate-100 mx-auto mb-4 flex items-center justify-center text-4xl text-slate-400"><i class="fa-solid fa-chalkboard-user"></i></div>
+    {% endif %}
+    <h2 class="font-bold text-lg">{{ teacher.display_name }}</h2>
+  </div>
+  <div class="card p-6 md:col-span-2 space-y-4">
+    <h3 class="font-semibold text-lg border-b pb-2">Details</h3>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div><span class="text-slate-500">Phone:</span> {{ teacher.teacher_profile.phone|default:"-" }}</div>
+      <div><span class="text-slate-500">Specialization:</span> {{ teacher.teacher_profile.subject_specialization|default:"-" }}</div>
+      <div><span class="text-slate-500">Email:</span> {{ teacher.email|default:"-" }}</div>
+      <div><span class="text-slate-500">Joined:</span> {{ teacher.date_joined|date:"d M Y" }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

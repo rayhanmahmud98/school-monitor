@@ -17,8 +17,9 @@
     .icon-box { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
   </style>
 </head>
-<body class="min-h-screen text-slate-800">
+<body class="min-h-screen text-slate-800 bg-gray-50">
 
+  {% block shell %}
   <div class="flex min-h-screen">
 
     <!-- Sidebar -->
@@ -73,7 +74,7 @@
     </div>
   </div>
 
-  <!-- Mobile Sidebar Toggle (Simplified for this design) -->
+  <!-- Mobile Sidebar Toggle -->
   <div class="fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 bg-white md:hidden">
     <div class="grid grid-cols-5 text-[10px] text-slate-500">
       <a href="{% url 'dashboard:home' %}" class="flex flex-col items-center gap-1 py-2 hover:text-indigo-600"><i class="fa-solid fa-house text-lg"></i><span>Home</span></a>
@@ -83,6 +84,7 @@
       <a href="{% url 'accounts:logout' %}" class="flex flex-col items-center gap-1 py-2 hover:text-rose-600"><i class="fa-solid fa-right-from-bracket text-lg"></i><span>Exit</span></a>
     </div>
   </div>
+  {% endblock %}
 
 </body>
 </html>

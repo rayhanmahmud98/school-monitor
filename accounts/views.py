@@ -1,27 +1,27 @@
 from django.contrib.auth.views import LoginView
-from django.shortcuts import render
+from django.core.exceptions import PermissionDenied
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 
 from students.models import ParentStudentLink
+from academics.models import SchoolProfile
 
 from .crud import build_crud
 from .forms import LoginForm, ParentStudentLinkForm, TeacherForm, UserAdminForm
 from .models import LoginHistory, User
 from .permissions import ADMIN, RoleBasedAccessMixin, role_required
 from .utils import paginate
+from .pdf import render_teacher_id_cards_pdf
 
 
 class RoleLoginView(LoginView):
-    """Login page. On success LOGIN_REDIRECT_URL -> dashboard:home -> role dashboard."""
     template_name = "accounts/login.html"
     authentication_form = LoginForm
     redirect_authenticated_user = True
 
 
-# Users CRUD (admin only).
-# - No admin can delete themselves.
-# - Nobody can delete the primary admin.
 users = build_crud(
     ns="accounts", name="user", slug="users", model_class=User, form_cls=UserAdminForm,
     title="Users", singular="User",
@@ -29,13 +29,10 @@ users = build_crud(
              ("Role", "get_role_display"), ("Active", "is_active")],
     search_fields=("username", "first_name", "last_name", "email"),
     ordering=("role", "username"),
-    can_delete=lambda obj, request: (
-        obj.pk != request.user.pk and not obj.is_primary_admin
-    ),
+    can_delete=lambda obj, request: (obj.pk != request.user.pk and not obj.is_primary_admin),
 )
 
 
-# Custom Views for Teachers to use TeacherForm
 class TeacherCreateView(RoleBasedAccessMixin, CreateView):
     allowed_roles = (User.Role.ADMIN,)
     model = User
@@ -65,26 +62,26 @@ class TeacherUpdateView(RoleBasedAccessMixin, UpdateView):
         return ctx
 
 
-# Teachers CRUD
+# Updated columns to include Employee ID, Blood, and rename Active to Status
 teachers = build_crud(
     ns="accounts", name="teacher", slug="teachers", model_class=User, form_cls=TeacherForm,
     title="Teachers", singular="Teacher",
-    columns=[("Username", "username"), ("Name", "display_name"), ("Email", "email"),
-             ("Phone", "teacher_profile.phone"),
-             ("Designation", "teacher_profile.designation"),
-             ("Specialization", "teacher_profile.subject_specialization"),
-             ("Active", "is_active")],
+    columns=[("User ID", "username"), ("Name", "display_name"), ("Employee ID", "teacher_profile.employee_id"),
+             ("Email", "email"), ("Phone", "teacher_profile.phone"),
+             ("Designation", "teacher_profile.designation"), ("Specialization", "teacher_profile.subject_specialization"),
+             ("Blood", "teacher_profile.blood_group"), ("Status", "is_active")],
     search_fields=("username", "first_name", "last_name", "email",
-                   "teacher_profile__phone", "teacher_profile__designation",
-                   "teacher_profile__subject_specialization"),
+                   "teacher_profile__employee_id", "teacher_profile__phone", 
+                   "teacher_profile__designation", "teacher_profile__subject_specialization"),
     select_related=("teacher_profile",),
     ordering=("first_name", "last_name"),
     allow_create=True,
     allow_delete=False,
     base_queryset=User.objects.filter(role="TEACHER"),
+    detail_url_name="accounts:teacher_profile",
 )
 
-# Parent links
+
 links = build_crud(
     ns="accounts", name="link", slug="links", model_class=ParentStudentLink,
     form_cls=ParentStudentLinkForm, title="Parent-Student Links", singular="Link",
@@ -114,3 +111,28 @@ def login_history(request):
         "page_obj": page_obj, "qs": querystring, "q": q,
         "user_id": user_id, "date_from": date_from, "date_to": date_to,
     })
+
+
+@role_required(ADMIN, "TEACHER")
+def teacher_profile(request, pk):
+    if request.user.role == "TEACHER" and request.user.pk != pk:
+        raise PermissionDenied
+    teacher = get_object_or_404(User.objects.filter(role="TEACHER").select_related("teacher_profile"), pk=pk)
+    subjects = teacher.subjects.all()
+    return render(request, "accounts/teacher_profile.html", {
+        "teacher": teacher, "subjects": subjects
+    })
+
+
+@role_required(ADMIN)
+def teacher_id_card(request, pk):
+    teacher = get_object_or_404(User.objects.filter(role="TEACHER"), pk=pk)
+    profile = SchoolProfile.objects.first()
+    pdf = render_teacher_id_cards_pdf([teacher], request=request, profile=profile)
+    filename = f"teacher_id_{teacher.username}.pdf"
+    return FileResponse(
+        iter([pdf]), 
+        content_type="application/pdf", 
+        as_attachment=True, 
+        filename=filename
+    )

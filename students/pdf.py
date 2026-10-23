@@ -1,15 +1,15 @@
-"""Student-facing PDFs: ID cards.
-
-A4 sheet = 210 x 297 mm. Each ID card is 85 x 55 mm (credit-card size).
-Two cards per A4 sheet, side by side near the top.
-"""
+"""Student-facing PDFs: ID cards and Transfer Certificates."""
 from io import BytesIO
+import qrcode
+from django.urls import reverse
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.platypus import (
+    Image, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle, PageBreak
+)
 
 INDIGO = colors.HexColor("#4338ca")
 LIGHT = colors.HexColor("#eef2ff")
@@ -46,119 +46,148 @@ def _photo_flowable(student, w=PHOTO_W, h=PHOTO_H):
     )
 
 
-def _one_card(student):
-    """Build a Table that renders one ID card."""
-    school = Paragraph(
-        '<font size="11" color="#4338ca"><b>SCHOOL MONITOR</b></font>',
-        getSampleStyleSheet()["BodyText"],
-    )
+def _qr_flowable(url, size=30*mm):
+    img = qrcode.make(url)
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return Image(buf, width=size, height=size)
 
-    meta_style = ParagraphStyle(
-        "meta", parent=getSampleStyleSheet()["BodyText"],
-        fontSize=8, leading=11, textColor=SLATE,
-    )
 
-    details = (
-        "<b>" + _safe(student.full_name) + "</b><br/>"
-        "ID: " + _safe(student.student_id) + "<br/>"
-        "Class: " + _safe(str(student.class_ref)) + " | Roll " + _safe(student.roll_no) + "<br/>"
-        "Blood: " + _safe(student.blood_group) + "<br/>"
-        "Guardian: " + _safe(student.guardian_name)
-    )
-
-    photo = _photo_flowable(student)
-    details_para = Paragraph(details, meta_style)
-
-    inner = Table(
-        [[photo, details_para]],
-        colWidths=[PHOTO_W + 2 * mm, CARD_W - PHOTO_W - 6 * mm],
-    )
-    inner.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ("TOPPADDING", (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+def _school_header(profile):
+    if profile and profile.logo and getattr(profile.logo, "path", None):
+        try:
+            logo = Image(profile.logo.path, width=12*mm, height=12*mm)
+        except Exception:
+            logo = ""
+    else:
+        logo = ""
+    
+    name = _safe(profile.name if profile else "SCHOOL MONITOR")
+    sub = "OFFICIAL STUDENT IDENTITY CARD"
+    
+    header_left = Table([[logo, name]], colWidths=[16*mm, 69*mm])
+    header_left.setStyle(TableStyle([
+        ("VALIGN", (0,0), (-1,-1), "MIDDLE"),
+        ("FONTNAME", (1,0), (1,0), "Helvetica-Bold"),
+        ("FONTSIZE", (1,0), (1,0), 12),
+        ("TEXTCOLOR", (1,0), (1,0), INDIGO),
     ]))
-
-    outer = Table(
-        [[school], [inner]],
-        colWidths=[CARD_W],
-        rowHeights=[8 * mm, CARD_H - 8 * mm],
-    )
-    outer.setStyle(TableStyle([
-        ("BOX", (0, 0), (-1, -1), 0.6, INDIGO),
-        ("BACKGROUND", (0, 0), (-1, 0), LIGHT),
-        ("BACKGROUND", (0, 1), (-1, 1), colors.white),
-        ("LEFTPADDING", (0, 0), (-1, -1), 3 * mm),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 3 * mm),
-        ("TOPPADDING", (0, 0), (-1, -1), 2 * mm),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-    ]))
-    return outer
+    
+    return [
+        header_left,
+        Spacer(1, 1*mm),
+        Paragraph(f'<font size="8" color="#475569">{sub}</font>', getSampleStyleSheet()["BodyText"]),
+        Spacer(1, 4*mm),
+        Table([[""]], colWidths=[85*mm], style=[("LINEBELOW", (0,0), (-1,-1), 0.5, colors.lightgrey)]),
+        Spacer(1, 4*mm)
+    ]
 
 
-def render_id_cards_pdf(students):
-    """Return PDF bytes for a list of students, two ID cards per A4 page."""
+def render_id_cards_pdf(students, request=None, profile=None):
+    """Render 1 student per A4 page (Front top half, Back bottom half)."""
+    from academics.models import IDCard
+    
     buf = BytesIO()
     doc = SimpleDocTemplate(
-        buf, pagesize=A4,
-        leftMargin=15 * mm, rightMargin=15 * mm,
-        topMargin=15 * mm, bottomMargin=15 * mm,
-        title="Student ID cards",
+        buf, pagesize=A4, 
+        leftMargin=15*mm, rightMargin=15*mm, 
+        topMargin=15*mm, bottomMargin=15*mm, 
+        title="Student ID Cards"
     )
-
+    
     story = []
-    gap = 5 * mm
+    base_url = request.build_absolute_uri("/")[:-1] if request else "http://localhost:8000"
 
-    for i in range(0, len(students), 2):
-        chunk = students[i:i + 2]
-        cards = [_one_card(s) for s in chunk]
+    for student in students:
+        card_obj, _ = IDCard.objects.get_or_create(kind=IDCard.Kind.STUDENT, student=student)
+        verify_url = f"{base_url}{reverse('dashboard:verify_id_card', args=[str(card_obj.uuid)])}"
 
-        if len(cards) == 1:
-            row = [[cards[0], ""]]
-            widths = [CARD_W, CARD_W]
-            style = TableStyle([
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-            ])
-        else:
-            row = [[cards[0], cards[1]]]
-            widths = [CARD_W, CARD_W]
-            style = TableStyle([
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (0, 0), 0),
-                ("RIGHTPADDING", (0, 0), (0, 0), gap),
-                ("LEFTPADDING", (1, 0), (1, 0), 0),
-                ("RIGHTPADDING", (1, 0), (1, 0), 0),
-            ])
+        # --- FRONT ---
+        front_story = _school_header(profile)
+        
+        photo = _photo_flowable(student)
+        
+        info_data = [
+            [Paragraph(f'<b>{_safe(student.full_name)}</b>', getSampleStyleSheet()["Heading3"])],
+            [Paragraph(f'Class / Grade: {_safe(student.class_ref.name)}', getSampleStyleSheet()["BodyText"])],
+            [Paragraph(f'Roll / Adm No: {_safe(student.roll_no)}', getSampleStyleSheet()["BodyText"])],
+            [Paragraph(f'Date of Birth: {_safe(student.date_of_birth.strftime("%d %b %Y") if student.date_of_birth else "-")}', getSampleStyleSheet()["BodyText"])],
+            [Paragraph(f'Blood Group: {_safe(student.blood_group)}', getSampleStyleSheet()["BodyText"])],
+        ]
+        info_tbl = Table(info_data, colWidths=[55*mm])
+        info_tbl.setStyle(TableStyle([("LEFTPADDING", (0,0), (-1,-1), 0), ("BOTTOMPADDING", (0,0), (-1,-1), 2)]))
 
-        t = Table(row, colWidths=widths, rowHeights=[CARD_H])
-        t.setStyle(style)
-        story.append(t)
-        story.append(Spacer(1, 8 * mm))
+        body = Table([[photo, info_tbl]], colWidths=[30*mm, 55*mm])
+        body.setStyle(TableStyle([("VALIGN", (0,0), (-1,-1), "TOP")]))
+        front_story.append(body)
+        front_story.append(Spacer(1, 4*mm))
+        
+        front_story.append(Table([[""]], colWidths=[85*mm], style=[("LINEBELOW", (0,0), (-1,-1), 0.5, colors.lightgrey)]))
+        front_story.append(Spacer(1, 2*mm))
+        
+        guardian = Paragraph(f"Parent / Guardian: {_safe(student.guardian_name)}", getSampleStyleSheet()["BodyText"])
+        sign = Paragraph("Principal's Signature: ______________________", getSampleStyleSheet()["BodyText"])
+        sid = Paragraph(f"STUDENT ID: <b>{_safe(student.student_id)}</b>", getSampleStyleSheet()["BodyText"])
+        
+        front_story.append(guardian)
+        front_story.append(Spacer(1, 6*mm))
+        
+        footer_tbl = Table([[sign, sid]], colWidths=[55*mm, 30*mm])
+        footer_tbl.setStyle(TableStyle([("ALIGN", (1,0), (1,0), "RIGHT")]))
+        front_story.append(footer_tbl)
 
-    if not story:
-        story.append(Paragraph("No students to render.", getSampleStyleSheet()["BodyText"]))
+        front_card = Table([[front_story]], colWidths=[85*mm])
+        front_card.setStyle(TableStyle([
+            ("BOX", (0,0), (-1,-1), 1, INDIGO),
+            ("LEFTPADDING", (0,0), (-1,-1), 4*mm),
+            ("RIGHTPADDING", (0,0), (-1,-1), 4*mm),
+            ("TOPPADDING", (0,0), (-1,-1), 4*mm),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 4*mm),
+        ]))
+
+        # --- BACK ---
+        back_story = [
+            Paragraph("<font color='#4338ca'><b>STUDENT ID VERIFICATION</b></font>", 
+                      ParagraphStyle("center", parent=getSampleStyleSheet()["Heading3"], alignment=1)),
+            Spacer(1, 6*mm),
+            _qr_flowable(verify_url, size=35*mm),
+            Spacer(1, 4*mm),
+            Paragraph("Scan to verify this student's identity", 
+                      ParagraphStyle("center2", parent=getSampleStyleSheet()["BodyText"], alignment=1)),
+            Spacer(1, 8*mm),
+            Table([[""]], colWidths=[85*mm], style=[("LINEBELOW", (0,0), (-1,-1), 0.5, colors.lightgrey)]),
+            Spacer(1, 4*mm),
+            Paragraph(f"<font size='7' color='#64748b'>{_safe(profile.return_note if profile else 'If found, return to the school office.')}</font>", 
+                      ParagraphStyle("center3", parent=getSampleStyleSheet()["BodyText"], alignment=1)),
+        ]
+
+        back_card = Table([[back_story]], colWidths=[85*mm], rowHeights=[85*mm])
+        back_card.setStyle(TableStyle([
+            ("BOX", (0,0), (-1,-1), 1, INDIGO),
+            ("ALIGN", (0,0), (-1,-1), "CENTER"),
+            ("VALIGN", (0,0), (-1,-1), "TOP"),
+            ("TOPPADDING", (0,0), (-1,-1), 6*mm),
+        ]))
+
+        # Add to main story
+        story.append(front_card)
+        story.append(Spacer(1, 8*mm))
+        story.append(Paragraph("✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -", 
+                               ParagraphStyle("cut", alignment=1, textColor=colors.lightgrey)))
+        story.append(Spacer(1, 8*mm))
+        story.append(back_card)
+        story.append(PageBreak())
 
     doc.build(story)
     return buf.getvalue()
 
 
-
 def render_transfer_certificate_pdf(tc, requested_by=None):
     """Return PDF bytes for a Transfer Certificate."""
     from django.utils import timezone as _tz
-    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 
     student = tc.student
-
-    def safe(v):
-        if v is None:
-            return "-"
-        return str(v).encode("ascii", "replace").decode("ascii")
 
     buf = BytesIO()
     doc = SimpleDocTemplate(
@@ -181,8 +210,8 @@ def render_transfer_certificate_pdf(tc, requested_by=None):
 
     # TC number banner
     num = Table(
-        [["Certificate No.", safe(tc.tc_number)],
-         ["Date of issue", safe(tc.issued_at.strftime("%d %b %Y"))]],
+        [["Certificate No.", _safe(tc.tc_number)],
+         ["Date of issue", _safe(tc.issued_at.strftime("%d %b %Y"))]],
         colWidths=[45 * mm, 110 * mm],
     )
     num.setStyle(TableStyle([
@@ -197,17 +226,17 @@ def render_transfer_certificate_pdf(tc, requested_by=None):
 
     # Student details
     rows = [
-        ["Student name", safe(student.full_name)],
-        ["Student ID", safe(student.student_id)],
-        ["Class & roll", safe(f"{student.class_ref}  |  Roll {student.roll_no}")],
-        ["Date of birth", safe(student.date_of_birth.strftime("%d %b %Y") if student.date_of_birth else None)],
-        ["Gender", safe(student.get_gender_display() if student.gender else None)],
-        ["Guardian", safe(student.guardian_name)],
-        ["Date of admission", safe(student.admission_date.strftime("%d %b %Y") if student.admission_date else None)],
-        ["Date of leaving", safe(tc.date_of_leaving.strftime("%d %b %Y"))],
-        ["Conduct", safe(tc.conduct)],
+        ["Student name", _safe(student.full_name)],
+        ["Student ID", _safe(student.student_id)],
+        ["Class & roll", _safe(f"{student.class_ref}  |  Roll {student.roll_no}")],
+        ["Date of birth", _safe(student.date_of_birth.strftime("%d %b %Y") if student.date_of_birth else None)],
+        ["Gender", _safe(student.get_gender_display() if student.gender else None)],
+        ["Guardian", _safe(student.guardian_name)],
+        ["Date of admission", _safe(student.admission_date.strftime("%d %b %Y") if student.admission_date else None)],
+        ["Date of leaving", _safe(tc.date_of_leaving.strftime("%d %b %Y"))],
+        ["Conduct", _safe(tc.conduct)],
         ["Dues cleared", "Yes" if tc.dues_cleared else "No"],
-        ["Reason for leaving", safe(tc.get_reason_display() + (f" - {tc.reason_note}" if tc.reason_note else ""))],
+        ["Reason for leaving", _safe(tc.get_reason_display() + (f" - {tc.reason_note}" if tc.reason_note else ""))],
     ]
     body_tbl = Table(
         [[Paragraph(k, small), Paragraph(v, body)] for k, v in rows],
@@ -225,7 +254,7 @@ def render_transfer_certificate_pdf(tc, requested_by=None):
     if tc.remarks:
         story += [
             Paragraph("Remarks", styles["Heading4"]),
-            Paragraph(safe(tc.remarks), body),
+            Paragraph(_safe(tc.remarks), body),
             Spacer(1, 6 * mm),
         ]
 
@@ -257,10 +286,10 @@ def render_transfer_certificate_pdf(tc, requested_by=None):
 
     # Footer
     generated = _tz.localtime().strftime("%d %b %Y %H:%M")
-    by = safe(requested_by.display_name) if requested_by else "system"
+    by = _safe(requested_by.display_name) if requested_by else "system"
     story += [
         Paragraph(
-            safe(f"Generated by {by} on {generated}. "
+            _safe(f"Generated by {by} on {generated}. "
                  "This is a computer-generated certificate."),
             small,
         ),

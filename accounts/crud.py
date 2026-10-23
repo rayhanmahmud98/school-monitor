@@ -18,7 +18,7 @@ from .permissions import RoleBasedAccessMixin
 def build_crud(*, ns, name, slug, model_class, form_cls, title, singular, columns,
                search_fields=(), select_related=(), ordering=None,
                allow_update=True, allow_create=True, allow_delete=True,
-               can_delete=None, base_queryset=None):
+               can_delete=None, base_queryset=None, detail_url_name=None):
     list_name = f"{ns}:{name}_list"
     admin_only = (User.Role.ADMIN,)
 
@@ -51,6 +51,7 @@ def build_crud(*, ns, name, slug, model_class, form_cls, title, singular, column
                 create_url=reverse(f"{ns}:{name}_create") if allow_create else "",
                 update_name=f"{ns}:{name}_update" if allow_update else "",
                 delete_name=f"{ns}:{name}_delete" if allow_delete else "",
+                detail_name=detail_url_name, # Added to enable View Profile buttons
                 q=self.request.GET.get("q", ""), searchable=bool(search_fields),
                 qs=params.urlencode(),
             )

@@ -2,6 +2,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+import uuid
+from django.core.exceptions import ValidationError
+
 
 
 class AcademicYear(models.Model):
@@ -259,3 +262,62 @@ class LeaveApplication(models.Model):
 
     def __str__(self):
         return f"{self.applicant_display} - {self.start_date} to {self.end_date} ({self.status})"
+
+class SchoolProfile(models.Model):
+    """Singleton model for school-level settings used on official documents."""
+    name = models.CharField(max_length=150, default="School Monitor")
+    address = models.TextField(blank=True)
+    phone = models.CharField(max_length=30, blank=True)
+    email = models.EmailField(blank=True)
+    logo = models.ImageField(upload_to="school/", blank=True, null=True)
+    return_note = models.CharField(
+        max_length=200, 
+        default="If this card is found, please return it to the school office."
+    )
+
+    class Meta:
+        verbose_name = "School Profile"
+        verbose_name_plural = "School Profile"
+
+    def save(self, *args, **kwargs):
+        # Enforce singleton
+        if not self.pk and SchoolProfile.objects.exists():
+            raise ValidationError("Only one School Profile can exist.")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
+class IDCard(models.Model):
+    """Generic verification token for student and teacher ID cards."""
+    class Kind(models.TextChoices):
+        STUDENT = "STUDENT", "Student"
+        TEACHER = "TEACHER", "Teacher"
+
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    kind = models.CharField(max_length=10, choices=Kind.choices)
+    student = models.OneToOneField(
+        "students.Student", null=True, blank=True,
+        on_delete=models.CASCADE, related_name="id_card"
+    )
+    teacher = models.OneToOneField(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.CASCADE, related_name="id_card",
+        limit_choices_to={"role": "TEACHER"}
+    )
+    issued_at = models.DateTimeField(default=timezone.now)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+
+    def is_valid(self):
+        if self.revoked_at:
+            return False
+        if self.kind == self.Kind.STUDENT:
+            return self.student is not None and self.student.is_active
+        if self.kind == self.Kind.TEACHER:
+            return self.teacher is not None and self.teacher.is_active
+        return False
+
+    def __str__(self):
+        who = self.student.full_name if self.student else self.teacher.display_name if self.teacher else "Unknown"
+        return f"{self.get_kind_display()} ID · {who}"

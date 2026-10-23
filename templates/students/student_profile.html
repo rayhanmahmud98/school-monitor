@@ -1,0 +1,55 @@
+{% extends base_template %}
+{% block title %}Profile — {{ student.full_name }}{% endblock %}
+{% block content %}
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <h1 class="text-2xl font-bold">{{ student.full_name }}</h1>
+    <p class="text-sm text-slate-500">{{ student.class_ref }} · Roll {{ student.roll_no }} · ID {{ student.student_id }}</p>
+  </div>
+  
+  <!-- Actions moved here from the main list -->
+  <div class="flex flex-wrap gap-2">
+    <a href="{% url 'students:student_update' student.pk %}" class="btn-primary">
+      <i class="fa-solid fa-pen"></i> Edit Profile
+    </a>
+    <a href="{% url 'students:student_documents' student.pk %}" class="btn-light" title="Documents">
+      <i class="fa-solid fa-folder-open"></i> Docs
+    </a>
+    <a href="{% url 'students:student_id_card' student.pk %}" class="btn-light" title="Download ID Card">
+      <i class="fa-solid fa-id-card"></i> ID Card
+    </a>
+    <a href="{% url 'students:transfer_certificate' student.pk %}" class="btn-light" title="Transfer Certificate">
+      <i class="fa-solid fa-file-export"></i> TC
+    </a>
+    <a href="{% url 'academics:student_progress_pdf' student.pk %}" class="btn-light" title="Progress Report">
+      <i class="fa-solid fa-file-pdf"></i> Progress
+    </a>
+    <a href="{% url 'academics:admit_card_page' student.pk %}" class="btn-light" title="Admit Card">
+      <i class="fa-solid fa-id-badge"></i> Admit
+    </a>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div class="card p-6 text-center">
+    {% if student.photo %}
+      <img src="{{ student.photo.url }}" class="w-32 h-32 rounded-full object-cover mx-auto mb-4">
+    {% else %}
+      <div class="w-32 h-32 rounded-full bg-slate-100 mx-auto mb-4 flex items-center justify-center text-4xl text-slate-400"><i class="fa-solid fa-user"></i></div>
+    {% endif %}
+    <h2 class="font-bold text-lg">{{ student.full_name }}</h2>
+    <p class="text-sm text-slate-500">{{ student.get_gender_display }} · Blood {{ student.blood_group|default:"-" }}</p>
+  </div>
+  
+  <div class="card p-6 md:col-span-2 space-y-4">
+    <h3 class="font-semibold text-lg border-b pb-2">Details</h3>
+    <div class="grid grid-cols-2 gap-4 text-sm">
+      <div><span class="text-slate-500">Date of Birth:</span> {{ student.date_of_birth|date:"d M Y"|default:"-" }}</div>
+      <div><span class="text-slate-500">Guardian:</span> {{ student.guardian_name|default:"-" }}</div>
+      <div><span class="text-slate-500">Contact:</span> {{ student.contact|default:"-" }}</div>
+      <div><span class="text-slate-500">Email:</span> {{ student.email|default:"-" }}</div>
+      <div class="col-span-2"><span class="text-slate-500">Address:</span> {{ student.address_line1 }} {{ student.address_line2 }} {{ student.city }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

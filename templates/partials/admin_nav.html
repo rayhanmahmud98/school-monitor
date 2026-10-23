@@ -4,9 +4,7 @@
 {% url 'accounts:user_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-users" label="Users" show_label=show_label %}
 {% url 'accounts:teacher_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-chalkboard-user" label="Teachers" show_label=show_label %}
 {% url 'students:my_students' as u %}{% include "partials/nav_item.html" with url=u icon="fa-user-graduate" label="Students" show_label=show_label %}
-{% url 'students:manage_students' as u %}{% include "partials/nav_item.html" with url=u icon="fa-user-pen" label="Manage students" show_label=show_label %}
 {% url 'accounts:link_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-link" label="Parent links" show_label=show_label %}
-{% url 'students:class_id_cards_page' as u %}{% include "partials/nav_item.html" with url=u icon="fa-id-card" label="Class ID cards" show_label=show_label %}
 {% url 'students:transfer_certificate_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-file-export" label="Transfer certificates" show_label=show_label %}
 
 <p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">Academics</p>

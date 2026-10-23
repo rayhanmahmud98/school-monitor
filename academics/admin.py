@@ -4,6 +4,8 @@ from .models import (
     LeaveApplication,
     ExamType,AcademicYear, Attendance, AuditLog, Exam, GradeScale, Marksheet,
                      ReportCard)
+from .models import SchoolProfile, IDCard
+
 
 
 @admin.register(AcademicYear)
@@ -69,3 +71,24 @@ class LeaveApplicationAdmin(admin.ModelAdmin):
     search_fields = ("student__full_name", "teacher__username", "reason")
     date_hierarchy = "start_date"
     readonly_fields = ("submitted_at", "reviewed_at")
+
+
+
+@admin.register(SchoolProfile)
+class SchoolProfileAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        # Prevent adding a second profile
+        return not SchoolProfile.objects.exists()
+
+@admin.register(IDCard)
+class IDCardAdmin(admin.ModelAdmin):
+    list_display = ("kind", "display_owner", "uuid", "issued_at", "revoked_at")
+    list_filter = ("kind", "revoked_at")
+    search_fields = ("uuid", "student__full_name", "teacher__username")
+    readonly_fields = ("uuid", "issued_at")
+
+    @admin.display(description="Owner")
+    def display_owner(self, obj):
+        if obj.student: return obj.student.full_name
+        if obj.teacher: return obj.teacher.display_name
+        return "-"

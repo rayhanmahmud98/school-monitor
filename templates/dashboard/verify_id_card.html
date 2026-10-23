@@ -1,0 +1,23 @@
+{% extends "base_public.html" %}
+{% block title %}Verify ID{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-lg mt-12">
+  {% if invalid %}
+    <div class="card p-10 text-center border-t-4 border-red-500">
+      <i class="fa-solid fa-circle-xmark text-5xl text-red-500 mb-4"></i>
+      <h1 class="text-2xl font-bold">Invalid ID</h1>
+      <p class="text-slate-600 mt-2">This ID card does not exist in our system.</p>
+    </div>
+  {% else %}
+    <div class="card p-10 text-center {% if is_valid %}border-t-4 border-emerald-500{% else %}border-t-4 border-red-500{% endif %}">
+      {% if is_valid %}
+        <i class="fa-solid fa-circle-check text-5xl text-emerald-500 mb-4"></i>
+        <h1 class="text-2xl font-bold">Identity Verified</h1>
+        <p class="text-slate-600 mt-1">This is a valid, active ID card.</p>
+      {% else %}
+        <i class="fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-4"></i>
+        <h1 class="text-2xl font-bold">ID Revoked or Inactive</h1>
+        <p class="text-slate-600 mt-1">This ID card is no longer active.</p>
+      {% endif %}
+
+     

@@ -20,8 +20,8 @@ class ParentProfileAdmin(admin.ModelAdmin):
 
 @admin.register(TeacherProfile)
 class TeacherProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "subject_specialization", "phone")
-    search_fields = ("user__username", "subject_specialization")
+    list_display = ("user", "employee_id", "subject_specialization", "phone")
+    search_fields = ("user__username", "employee_id", "subject_specialization")
 
 
 @admin.register(LoginHistory)

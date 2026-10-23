@@ -3,10 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 
-
-# This username can never be deleted or deactivated by anyone.
 PRIMARY_ADMIN_USERNAME = "admin"
-
 
 class User(AbstractUser):
     """Custom user with a single role that drives all permissions."""
@@ -19,7 +16,6 @@ class User(AbstractUser):
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.PARENT)
 
     def save(self, *args, **kwargs):
-        # Superusers are always admins; admins may enter Django's /django-admin/ site.
         if self.is_superuser:
             self.role = self.Role.ADMIN
         if self.role == self.Role.ADMIN:
@@ -32,7 +28,6 @@ class User(AbstractUser):
 
     @property
     def is_primary_admin(self):
-        """True for the one protected account that nobody can delete or deactivate."""
         return self.username == PRIMARY_ADMIN_USERNAME
 
     def __str__(self):
@@ -58,7 +53,20 @@ class TeacherProfile(models.Model):
         LECTURER = "LECTURER", "Lecturer"
         INSTRUCTOR = "INSTRUCTOR", "Instructor"
 
+    class BloodGroup(models.TextChoices):
+        A_POS = "A+", "A+"
+        A_NEG = "A-", "A-"
+        B_POS = "B+", "B+"
+        B_NEG = "B-", "B-"
+        AB_POS = "AB+", "AB+"
+        AB_NEG = "AB-", "AB-"
+        O_POS = "O+", "O+"
+        O_NEG = "O-", "O-"
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="teacher_profile")
+    employee_id = models.CharField(max_length=30, unique=True, blank=True, null=True, help_text="Manual employee ID")
+    blood_group = models.CharField(max_length=3, choices=BloodGroup.choices, blank=True)
+    photo = models.ImageField(upload_to="teacher_photos/", null=True, blank=True)
     subject_specialization = models.CharField(max_length=100, blank=True)
     designation = models.CharField(
         max_length=30,
@@ -75,7 +83,6 @@ class TeacherProfile(models.Model):
 
 class LoginHistory(models.Model):
     """Records every successful login for the audit trail."""
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

@@ -33,6 +33,7 @@
             <td class="td" data-label="{{ label }}">{{ obj|attr:path }}</td>
           {% endfor %}
           <td class="td whitespace-nowrap text-right" data-label="Actions">
+            {% if detail_name %}<a href="{% url detail_name obj.pk %}" class="text-slate-600 hover:underline mr-3">View</a>{% endif %}
             {% if update_name %}<a href="{% url update_name obj.pk %}" class="text-indigo-600 hover:underline mr-3">Edit</a>{% endif %}
             {% if delete_name %}<a href="{% url delete_name obj.pk %}" class="text-red-600 hover:underline">Delete</a>{% endif %}
           </td>
