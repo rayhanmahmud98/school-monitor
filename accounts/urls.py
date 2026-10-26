@@ -7,10 +7,13 @@ app_name = "accounts"
 urlpatterns = [
     path("login/", views.RoleLoginView.as_view(), name="login"),
     
-    # Fix for the 405 Logout Error
+    # Allow both GET and POST to prevent 405 errors on logout
     path(
         "logout/", 
-        auth_views.LogoutView.as_view(next_page="accounts:login"), 
+        auth_views.LogoutView.as_view(
+            next_page="accounts:login",
+            http_method_names=["get", "post", "options"]
+        ), 
         name="logout"
     ),
     
