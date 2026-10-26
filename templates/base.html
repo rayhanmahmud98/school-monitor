@@ -4,106 +4,495 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
   <title>{% block title %}School Monitor{% endblock %}</title>
 
+  <meta name="theme-color" content="#111827">
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
-  
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/responsive.css' %}?v=4">
+
   <style>
-    body { background-color: #f3f4f6; }
-    .sidebar-gradient { background: linear-gradient(180deg, #111827 0%, #1e1b4b 100%); }
-    .stat-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .icon-box { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    :root {
+      --sidebar: #111827;
+      --sidebar-hover: #1f2937;
+      --primary: #4f46e5;
+      --page-bg: #f8fafc;
+      --border: #e5e7eb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page-bg);
+      color: #1e293b;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                   BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:focus-visible, a:focus-visible {
+      outline: 3px solid #a5b4fc;
+      outline-offset: 3px;
+    }
+
+    /* Sidebar */
+    .sidebar-gradient {
+      background: linear-gradient(180deg, #111827 0%, #171b35 100%);
+    }
+
+    .sidebar-brand {
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .sidebar-nav {
+      scrollbar-width: thin;
+      scrollbar-color: #374151 transparent;
+    }
+
+    .sidebar-nav a,
+    .sidebar-nav button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 11px 13px;
+      border-radius: 10px;
+      color: #aeb8ca;
+      font-size: 13px;
+      font-weight: 500;
+      text-align: left;
+      text-decoration: none;
+      transition: background .2s ease, color .2s ease;
+    }
+
+    .sidebar-nav a i,
+    .sidebar-nav button i {
+      width: 19px;
+      text-align: center;
+      font-size: 15px;
+    }
+
+    .sidebar-nav a:hover,
+    .sidebar-nav button:hover {
+      color: #fff;
+      background: rgba(255,255,255,.07);
+    }
+
+    /* Add .active to the current navigation link */
+    .sidebar-nav a.active,
+    .sidebar-nav button.active {
+      color: #fff;
+      background: linear-gradient(90deg, #4f46e5, #6366f1);
+      box-shadow: 0 5px 14px rgba(79,70,229,.18);
+    }
+
+    .nav-section-label {
+      padding: 21px 13px 8px;
+      color: #69778f;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    /* Content cards */
+    .stat-card {
+      background: #fff;
+      border: 1px solid #edf0f5;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(15,23,42,.025);
+    }
+
+    .icon-box {
+      display: flex;
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      border-radius: 13px;
+      font-size: 18px;
+    }
+
+    /* Header */
+    .topbar {
+      background: rgba(255,255,255,.92);
+      border-bottom: 1px solid #e9edf3;
+      backdrop-filter: blur(14px);
+    }
+
+    .profile-chip {
+      border: 1px solid #edf0f5;
+      border-radius: 14px;
+      background: #fff;
+      transition: background .2s ease;
+    }
+
+    /* Mobile drawer */
+    #mobile-sidebar {
+      transition: transform .28s ease;
+      will-change: transform;
+    }
+
+    #mobile-sidebar.closed {
+      transform: translateX(-105%);
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #mobile-sidebar:not(.closed) {
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    #mobile-overlay {
+      transition: opacity .25s ease;
+    }
+
+    #mobile-overlay.hidden {
+      display: none;
+    }
+
+    body.menu-open {
+      overflow: hidden;
+    }
+
+    /* Bottom navigation */
+    .bottom-nav {
+      padding-bottom: env(safe-area-inset-bottom);
+      box-shadow: 0 -4px 20px rgba(15,23,42,.04);
+    }
+
+    .bottom-nav a,
+    .bottom-nav button {
+      color: #8490a3;
+      transition: color .2s ease;
+    }
+
+    .bottom-nav a:hover,
+    .bottom-nav button:hover,
+    .bottom-nav a.active {
+      color: var(--primary);
+    }
+
+    /* Form and table consistency */
+    input, select, textarea {
+      max-width: 100%;
+    }
+
+    @media (max-width: 767px) {
+      .stat-card {
+        border-radius: 13px;
+      }
+
+      main {
+        min-width: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
   </style>
+
+  {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen text-slate-800 bg-gray-50">
 
-  {% block shell %}
-  <div class="flex min-h-screen">
+<body class="min-h-screen">
 
-    <!-- Sidebar (Desktop) -->
-    <aside class="hidden md:flex w-64 shrink-0 flex-col sidebar-gradient text-slate-300">
-      <div class="flex h-20 items-center gap-3 px-6">
-        <div class="bg-white text-indigo-900 p-2 rounded-lg"><i class="fa-solid fa-graduation-cap text-xl"></i></div>
-        <span class="font-bold text-white text-lg tracking-wide">School Monitor</span>
-      </div>
+{% block shell %}
 
-      <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-        {% block nav %}{% endblock %}
-      </nav>
+<!-- Mobile overlay -->
+<div id="mobile-overlay"
+     class="fixed inset-0 z-40 hidden bg-slate-950/50 opacity-0 md:hidden"
+     aria-hidden="true"></div>
 
-      <div class="p-4 border-t border-slate-700/50">
-        <!-- SECURE LOGOUT FORM (SIDEBAR) -->
-        <form method="post" action="{% url 'accounts:logout' %}">
-          {% csrf_token %}
-          <button type="submit" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors text-left">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i> Log out
-          </button>
-        </form>
-      </div>
-    </aside>
+<!-- Mobile sidebar -->
+<aside id="mobile-sidebar"
+       class="sidebar-gradient closed fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col text-slate-300 shadow-2xl md:hidden"
+       aria-label="Mobile navigation"
+       aria-hidden="true"
+       inert>
 
-    <!-- Main Content Area -->
-    <div class="flex min-w-0 flex-1 flex-col">
-      
-      <!-- Top Navbar -->
-      <header class="flex h-20 items-center justify-between px-4 md:px-8 bg-transparent">
-        <div>
-          <p class="text-xs text-slate-500 font-medium mb-1">Dashboard</p>
-        </div>
-        <div class="flex items-center gap-4">
-          <button class="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-500 relative">
-            <i class="fa-regular fa-bell text-lg"></i>
-            <span class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></span>
-          </button>
-          <div class="flex items-center gap-3 bg-white px-2 py-1.5 rounded-full shadow-sm">
-            <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-              {{ request.user.first_name|default:"SA"|slice:":2"|upper }}
-            </div>
-            <div class="pr-2 hidden sm:block">
-              <p class="text-xs font-bold text-slate-800">{{ request.user.display_name }}</p>
-              <p class="text-[10px] text-slate-500">{{ request.user.get_role_display }}</p>
-            </div>
-            <i class="fa-solid fa-chevron-down text-slate-400 text-xs pr-1"></i>
-          </div>
-        </div>
-      </header>
+  <div class="sidebar-brand flex h-[76px] shrink-0 items-center justify-between px-5">
+    <a href="{% url 'dashboard:home' %}"
+       class="flex items-center gap-3 no-underline">
+      <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-indigo-700 shadow-sm">
+        <i class="fa-solid fa-graduation-cap text-xl"></i>
+      </span>
+      <span>
+        <span class="block text-sm font-bold tracking-wide text-white">School Monitor</span>
+        <span class="mt-0.5 block text-[10px] text-slate-400">School Management System</span>
+      </span>
+    </a>
 
-      <!-- Page Content -->
-      <main class="flex-1 px-4 pb-24 lg:px-8 md:pb-8">
-        {% include "partials/messages.html" %}
-        {% block content %}{% endblock %}
-      </main>
-    </div>
+    <button type="button"
+            data-menu-close
+            class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white"
+            aria-label="Close navigation">
+      <i class="fa-solid fa-xmark text-lg"></i>
+    </button>
   </div>
 
-  <!-- Mobile Bottom Navigation (Mobile Only) -->
-  <div class="fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 bg-white md:hidden">
-    <div class="grid grid-cols-5 text-[10px] text-slate-500">
-      <a href="{% url 'dashboard:home' %}" class="flex flex-col items-center justify-center gap-1 py-2 hover:text-indigo-600">
-        <i class="fa-solid fa-house text-lg"></i><span>Home</span>
-      </a>
-      <a href="{% url 'students:my_students' %}" class="flex flex-col items-center justify-center gap-1 py-2 hover:text-indigo-600">
-        <i class="fa-solid fa-user-graduate text-lg"></i><span>Students</span>
-      </a>
-      <a href="{% url 'academics:attendance_mark' %}" class="flex flex-col items-center justify-center gap-1 py-2 hover:text-indigo-600">
-        <i class="fa-solid fa-clipboard-user text-lg"></i><span>Attend</span>
-      </a>
-      <a href="{% url 'academics:marks_overview' %}" class="flex flex-col items-center justify-center gap-1 py-2 hover:text-indigo-600">
-        <i class="fa-solid fa-table-list text-lg"></i><span>Marks</span>
-      </a>
-      
-      <!-- SECURE LOGOUT FORM (MOBILE) -->
-      <form method="post" action="{% url 'accounts:logout' %}" class="flex flex-col items-center justify-center w-full">
+  <nav class="sidebar-nav flex-1 space-y-1 overflow-y-auto px-3 pb-4 pt-4">
+    {% block nav_mobile %}{% endblock %}
+  </nav>
+
+  <div class="border-t border-white/10 p-4">
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button type="submit"
+              class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-rose-300 transition hover:bg-rose-500/10">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+        Log out
+      </button>
+    </form>
+  </div>
+</aside>
+
+<div class="flex min-h-screen">
+
+  <!-- Desktop sidebar -->
+  <aside class="sidebar-gradient sticky top-0 hidden h-screen w-[260px] shrink-0 flex-col text-slate-300 md:flex lg:w-[272px]">
+
+    <div class="sidebar-brand flex h-[84px] shrink-0 items-center gap-3 px-6">
+      <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-indigo-700 shadow-sm">
+        <i class="fa-solid fa-graduation-cap text-xl"></i>
+      </span>
+
+      <div class="min-w-0">
+        <h1 class="text-[15px] font-bold tracking-wide text-white">
+          School Monitor
+        </h1>
+        <p class="mt-1 text-[10px] tracking-wide text-slate-400">
+          SCHOOL MANAGEMENT
+        </p>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav flex-1 space-y-1 overflow-y-auto px-3 pb-5 pt-4">
+      {% block nav %}{% endblock %}
+    </nav>
+
+    <div class="border-t border-white/10 p-4">
+      <form method="post" action="{% url 'accounts:logout' %}">
         {% csrf_token %}
-        <button type="submit" class="flex flex-col items-center justify-center gap-1 py-2 hover:text-rose-600 w-full">
-          <i class="fa-solid fa-right-from-bracket text-lg"></i><span>Exit</span>
+        <button type="submit"
+                class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-400 transition hover:bg-rose-500/10 hover:text-rose-300">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          Log out
         </button>
       </form>
     </div>
+  </aside>
+
+  <!-- Main application -->
+  <div class="flex min-w-0 flex-1 flex-col">
+
+    <!-- Top navbar -->
+    <header class="topbar sticky top-0 z-30 flex h-[72px] shrink-0 items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+
+      <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+        <button type="button"
+                data-menu-open
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-indigo-200 hover:text-indigo-600 md:hidden"
+                aria-label="Open navigation"
+                aria-controls="mobile-sidebar"
+                aria-expanded="false">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+
+        <div class="min-w-0">
+          <!-- FIXED: Removed 'hidden' so this shows on mobile -->
+          <p class="text-[11px] font-semibold uppercase tracking-[1.5px] text-slate-400 block">
+            SCHOOL MANAGEMENT SYSTEM
+          </p>
+          <h2 class="mt-0.5 truncate text-base font-bold text-slate-800 sm:text-lg">
+            {% block page_heading %}Dashboard{% endblock %}
+          </h2>
+        </div>
+      </div>
+
+      <div class="flex shrink-0 items-center gap-3 sm:gap-4">
+
+        {% block navbar_actions %}{% endblock %}
+
+        <div class="hidden h-9 w-px bg-slate-200 sm:block"></div>
+
+        <div class="profile-chip flex items-center gap-2.5 px-2 py-1.5 sm:gap-3 sm:px-3">
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-xs font-bold text-white shadow-sm shadow-indigo-200">
+            {{ request.user.first_name|default:"SA"|slice:":2"|upper }}
+          </div>
+
+          <!-- FIXED: Removed 'hidden' so the name and role show on mobile -->
+          <div class="block min-w-0">
+            <p class="max-w-[150px] truncate text-xs font-bold text-slate-800">
+              {{ request.user.display_name }}
+            </p>
+            <p class="mt-0.5 text-[10px] text-slate-500">
+              {{ request.user.get_role_display }}
+            </p>
+          </div>
+
+          <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 block"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="min-w-0 flex-1 px-4 pb-24 pt-6 sm:px-6 sm:pt-7 md:pb-8 lg:px-8">
+
+      <div class="mx-auto w-full max-w-[1600px]">
+        {% include "partials/messages.html" %}
+
+        {% block content %}{% endblock %}
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="hidden border-t border-slate-200/80 px-8 py-4 text-center text-[11px] text-slate-400 md:block">
+      School Monitor
+      <span class="mx-1.5">·</span>
+      School Management System
+    </footer>
+
   </div>
-  {% endblock %}
+</div>
+
+<!-- Mobile bottom navigation -->
+<nav class="bottom-nav fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white md:hidden"
+     aria-label="Quick navigation">
+
+  <div class="grid grid-cols-5">
+
+    <a href="{% url 'dashboard:home' %}"
+       class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2">
+      <i class="fa-solid fa-house text-[18px]"></i>
+      <span class="text-[10px] font-semibold">Home</span>
+    </a>
+
+    <a href="{% url 'students:my_students' %}"
+       class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2">
+      <i class="fa-solid fa-user-graduate text-[18px]"></i>
+      <span class="text-[10px] font-semibold">Students</span>
+    </a>
+
+    <a href="{% url 'academics:attendance_mark' %}"
+       class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2">
+      <i class="fa-solid fa-clipboard-user text-[18px]"></i>
+      <span class="text-[10px] font-semibold">Attend</span>
+    </a>
+
+    <a href="{% url 'academics:marks_overview' %}"
+       class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2">
+      <i class="fa-solid fa-table-list text-[18px]"></i>
+      <span class="text-[10px] font-semibold">Marks</span>
+    </a>
+
+    <button type="button"
+            data-menu-open
+            class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2"
+            aria-controls="mobile-sidebar"
+            aria-expanded="false">
+      <i class="fa-solid fa-bars text-[18px]"></i>
+      <span class="text-[10px] font-semibold">Menu</span>
+    </button>
+
+  </div>
+</nav>
+
+<script>
+(function () {
+  const sidebar = document.getElementById("mobile-sidebar");
+  const overlay = document.getElementById("mobile-overlay");
+  const openButtons = document.querySelectorAll("[data-menu-open]");
+  const closeButtons = document.querySelectorAll("[data-menu-close]");
+
+  if (!sidebar || !overlay) return;
+
+  let previousFocus = null;
+
+  function setMenuState(isOpen) {
+    sidebar.classList.toggle("closed", !isOpen);
+    overlay.classList.toggle("hidden", !isOpen);
+    overlay.classList.toggle("opacity-0", !isOpen);
+
+    sidebar.setAttribute("aria-hidden", String(!isOpen));
+    sidebar.inert = !isOpen;
+    document.body.classList.toggle("menu-open", isOpen);
+
+    openButtons.forEach(function (button) {
+      button.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    if (isOpen) {
+      previousFocus = document.activeElement;
+      const closeButton = sidebar.querySelector("[data-menu-close]");
+      if (closeButton) closeButton.focus();
+    } else if (previousFocus && typeof previousFocus.focus === "function") {
+      previousFocus.focus();
+    }
+  }
+
+  function openMenu() {
+    setMenuState(true);
+  }
+
+  function closeMenu() {
+    setMenuState(false);
+  }
+
+  openButtons.forEach(function (button) {
+    button.addEventListener("click", openMenu);
+  });
+
+  closeButtons.forEach(function (button) {
+    button.addEventListener("click", closeMenu);
+  });
+
+  overlay.addEventListener("click", closeMenu);
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && !sidebar.classList.contains("closed")) {
+      closeMenu();
+    }
+  });
+
+  sidebar.querySelectorAll("nav a").forEach(function (link) {
+    link.addEventListener("click", function () {
+      if (window.innerWidth < 768) closeMenu();
+    });
+  });
+
+  window.addEventListener("resize", function () {
+    if (window.innerWidth >= 768 && !sidebar.classList.contains("closed")) {
+      closeMenu();
+    }
+  });
+})();
+</script>
+
+{% endblock %}
+
+{% block extra_scripts %}{% endblock %}
 
 </body>
 </html>

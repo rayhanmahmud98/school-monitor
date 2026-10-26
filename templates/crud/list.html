@@ -1,51 +1,85 @@
 {% extends base_template %}{% load ui_extras %}
 {% block title %}{{ title }}{% endblock %}
+{% block page_heading %}{{ title }}{% endblock %}
+
 {% block content %}
+<section>
 
-<div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-  <h1 class="text-2xl font-bold">{{ title }}</h1>
-  {% if create_url %}
-    <a href="{{ create_url }}" class="btn-primary"><i class="fa-solid fa-plus"></i> Add {{ singular }}</a>
-  {% endif %}
-</div>
-
-{% if searchable %}
-<form method="get" class="mb-4 flex flex-wrap gap-2">
-  <input name="q" value="{{ q }}" placeholder="Search…" class="input w-full sm:max-w-sm">
-  <button class="btn-light"><i class="fa-solid fa-magnifying-glass"></i></button>
-  {% if q %}<a href="?" class="btn-light">Clear</a>{% endif %}
-</form>
-{% endif %}
-
-<div class="card">
-  <div class="table-wrap">
-    <table class="min-w-full divide-y divide-slate-200 card-stack">
-      <thead class="bg-slate-50">
-        <tr>
-          {% for label, path in columns %}<th class="th">{{ label }}</th>{% endfor %}
-          <th class="th text-right">Actions</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100">
-        {% for obj in object_list %}
-        <tr class="hover:bg-slate-50">
-          {% for label, path in columns %}
-            <td class="td" data-label="{{ label }}">{{ obj|attr:path }}</td>
-          {% endfor %}
-          <td class="td whitespace-nowrap text-right" data-label="Actions">
-            {% if detail_name %}<a href="{% url detail_name obj.pk %}" class="text-slate-600 hover:underline mr-3">View</a>{% endif %}
-            {% if update_name %}<a href="{% url update_name obj.pk %}" class="text-indigo-600 hover:underline mr-3">Edit</a>{% endif %}
-            {% if delete_name %}<a href="{% url delete_name obj.pk %}" class="text-red-600 hover:underline">Delete</a>{% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr><td colspan="{{ columns|length|add:1 }}" class="px-4 py-10 text-center text-slate-500">No records found.</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="app-heading">
+    <div>
+      <h2>{{ title }}</h2>
+      <p>Manage {{ title|lower }}</p>
+    </div>
+    {% if create_url %}
+      <a href="{{ create_url }}" class="app-btn-primary">
+        <i class="fa-solid fa-plus"></i> Add {{ singular }}
+      </a>
+    {% endif %}
   </div>
-</div>
 
-{% include "partials/pagination.html" %}
+  {% if searchable %}
+  <form method="get" class="app-toolbar">
+    <div class="app-search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input name="q" value="{{ q }}" placeholder="Search...">
+    </div>
+    <button class="app-btn-light"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+    {% if q %}<a href="?" class="app-btn-light">Clear</a>{% endif %}
+  </form>
+  {% endif %}
 
+  <div class="app-table-card">
+    <div class="app-table-scroll">
+      <table class="app-table">
+        <thead>
+          <tr>
+            {% for label, path in columns %}<th>{{ label }}</th>{% endfor %}
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for obj in object_list %}
+          <tr>
+            {% for label, path in columns %}
+              <td data-label="{{ label }}">{{ obj|attr:path }}</td>
+            {% endfor %}
+            <td data-label="Actions">
+              <div class="app-actions">
+                {% if detail_name %}
+                  <a href="{% url detail_name obj.pk %}" class="app-action-btn" title="View">
+                    <i class="fa-regular fa-eye"></i>
+                  </a>
+                {% endif %}
+                {% if update_name %}
+                  <a href="{% url update_name obj.pk %}" class="app-action-btn" title="Edit">
+                    <i class="fa-regular fa-pen-to-square"></i>
+                  </a>
+                {% endif %}
+                {% if delete_name %}
+                  <a href="{% url delete_name obj.pk %}" class="app-action-btn delete" title="Delete">
+                    <i class="fa-regular fa-trash-can"></i>
+                  </a>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="{{ columns|length|add:1 }}">
+              <div class="app-empty">
+                <i class="fa-regular fa-folder-open"></i>
+                <strong>No records found</strong>
+                <p>Try adjusting your search or filters.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% include "partials/pagination.html" %}
+
+</section>
 {% endblock %}
