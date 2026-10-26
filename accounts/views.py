@@ -1,7 +1,8 @@
 from django.contrib.auth.views import LoginView
+from django.contrib.auth import logout
 from django.core.exceptions import PermissionDenied
 from django.http import FileResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
 
@@ -136,3 +137,9 @@ def teacher_id_card(request, pk):
         as_attachment=True, 
         filename=filename
     )
+
+
+def custom_logout(request):
+    """Logs the user out and redirects to the login page."""
+    logout(request)
+    return redirect("accounts:login")

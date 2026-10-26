@@ -1,4 +1,3 @@
-from django.contrib.auth import views as auth_views
 from django.urls import path
 from . import views
 
@@ -7,15 +6,8 @@ app_name = "accounts"
 urlpatterns = [
     path("login/", views.RoleLoginView.as_view(), name="login"),
     
-    # Allow both GET and POST to prevent 405 errors on logout
-    path(
-        "logout/", 
-        auth_views.LogoutView.as_view(
-            next_page="accounts:login",
-            http_method_names=["get", "post", "options"]
-        ), 
-        name="logout"
-    ),
+    # Use the custom logout view
+    path("logout/", views.custom_logout, name="logout"),
     
     path("login-history/", views.login_history, name="login_history"),
 
