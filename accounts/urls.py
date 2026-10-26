@@ -6,7 +6,14 @@ app_name = "accounts"
 
 urlpatterns = [
     path("login/", views.RoleLoginView.as_view(), name="login"),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    
+    # This explicit next_page forces the redirect to the login page on success
+    path(
+        "logout/", 
+        auth_views.LogoutView.as_view(next_page="accounts:login"), 
+        name="logout"
+    ),
+    
     path("login-history/", views.login_history, name="login_history"),
 
     *views.users.urls,
