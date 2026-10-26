@@ -7,7 +7,7 @@ app_name = "accounts"
 urlpatterns = [
     path("login/", views.RoleLoginView.as_view(), name="login"),
     
-    # This explicit next_page forces the redirect to the login page on success
+    # Fix for the 405 Logout Error
     path(
         "logout/", 
         auth_views.LogoutView.as_view(next_page="accounts:login"), 
@@ -21,7 +21,6 @@ urlpatterns = [
     path("teachers/new/", views.TeacherCreateView.as_view(), name="teacher_create"),
     path("teachers/<int:pk>/edit/", views.TeacherUpdateView.as_view(), name="teacher_update"),
     
-    # New Profile and ID Card routes
     path("teachers/<int:pk>/", views.teacher_profile, name="teacher_profile"),
     path("teachers/<int:pk>/id-card.pdf", views.teacher_id_card, name="teacher_id_card"),
 
