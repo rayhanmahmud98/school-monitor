@@ -37,65 +37,67 @@
   <a href="?" class="btn-light">Reset</a>
 </form>
 
-<div class="card overflow-x-auto">
-  <table class="min-w-full divide-y divide-slate-200">
-    <thead class="bg-slate-50">
-      <tr>
-        <th class="th"></th>
-        <th class="th">Roll</th>
-        <th class="th">Student ID</th>
-        <th class="th">Name</th>
-        <th class="th">Class</th>
-        <th class="th">Section</th>
-        <th class="th">Guardian</th>
-        <th class="th">Contact</th>
-        <th class="th">Blood</th>
-        <th class="th">Status</th>
-        <th class="th text-right">Actions</th>
-      </tr>
-    </thead>
-    <tbody class="divide-y divide-slate-100">
-    {% for s in page_obj %}
-      <tr class="hover:bg-slate-50">
-        <td class="td">
-          {% if s.photo %}
-            <img src="{{ s.photo.url }}" alt="" class="h-9 w-9 rounded-full object-cover">
-          {% else %}
-            <div class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600">
-              {{ s.first_name|default:s.full_name|slice:":1"|upper }}
-            </div>
-          {% endif %}
-        </td>
-        <td class="td">{{ s.roll_no }}</td>
-        <td class="td font-mono text-xs text-slate-500">{{ s.student_id|default:"—" }}</td>
-        <td class="td font-medium">{{ s.full_name }}</td>
-        <td class="td">{{ s.class_ref.name }}</td>
-        <td class="td">{{ s.class_ref.section|default:"—" }}</td>
-        <td class="td">{{ s.guardian_name }}</td>
-        <td class="td">{{ s.contact }}</td>
-        <td class="td">{{ s.blood_group|default:"—" }}</td>
-        <td class="td">
-          {% if s.is_active %}
-            <span class="badge bg-green-100 text-green-800">Active</span>
-          {% else %}
-            <span class="badge bg-slate-100 text-slate-600">Inactive</span>
-          {% endif %}
-        </td>
-        <td class="td whitespace-nowrap text-right">
-          <a href="{% url 'students:student_profile' s.pk %}" class="text-slate-600 hover:underline mr-3">View</a>
-          <a href="{% url 'students:student_update' s.pk %}" class="text-indigo-600 hover:underline mr-3">Edit</a>
-          <a href="{% url 'students:student_id_card' s.pk %}" class="text-slate-600 hover:underline" title="Download ID Card">
-            <i class="fa-solid fa-id-card"></i> ID
-          </a>
-        </td>
-      </tr>
-    {% empty %}
-      <tr>
-        <td colspan="11" class="px-4 py-10 text-center text-slate-500">No students found.</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+<div class="card">
+  <div class="table-wrap">
+    <table class="min-w-full divide-y divide-slate-200 card-stack">
+      <thead class="bg-slate-50">
+        <tr>
+          <th class="th">Photo</th>
+          <th class="th">Roll</th>
+          <th class="th">Student ID</th>
+          <th class="th">Name</th>
+          <th class="th">Class</th>
+          <th class="th">Section</th>
+          <th class="th">Guardian</th>
+          <th class="th">Contact</th>
+          <th class="th">Blood</th>
+          <th class="th">Status</th>
+          <th class="th text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+      {% for s in page_obj %}
+        <tr class="hover:bg-slate-50">
+          <td class="td" data-label="Photo">
+            {% if s.photo %}
+              <img src="{{ s.photo.url }}" alt="" class="h-9 w-9 rounded-full object-cover">
+            {% else %}
+              <div class="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-600">
+                {{ s.first_name|default:s.full_name|slice:":1"|upper }}
+              </div>
+            {% endif %}
+          </td>
+          <td class="td" data-label="Roll">{{ s.roll_no }}</td>
+          <td class="td font-mono text-xs text-slate-500" data-label="Student ID">{{ s.student_id|default:"—" }}</td>
+          <td class="td font-medium" data-label="Name">{{ s.full_name }}</td>
+          <td class="td" data-label="Class">{{ s.class_ref.name }}</td>
+          <td class="td" data-label="Section">{{ s.class_ref.section|default:"—" }}</td>
+          <td class="td" data-label="Guardian">{{ s.guardian_name }}</td>
+          <td class="td" data-label="Contact">{{ s.contact }}</td>
+          <td class="td" data-label="Blood">{{ s.blood_group|default:"—" }}</td>
+          <td class="td" data-label="Status">
+            {% if s.is_active %}
+              <span class="badge bg-green-100 text-green-800">Active</span>
+            {% else %}
+              <span class="badge bg-slate-100 text-slate-600">Inactive</span>
+            {% endif %}
+          </td>
+          <td class="td whitespace-nowrap text-right" data-label="Actions">
+            <a href="{% url 'students:student_profile' s.pk %}" class="text-slate-600 hover:underline mr-3">View</a>
+            <a href="{% url 'students:student_update' s.pk %}" class="text-indigo-600 hover:underline mr-3">Edit</a>
+            <a href="{% url 'students:student_id_card' s.pk %}" class="text-slate-600 hover:underline" title="Download ID Card">
+              <i class="fa-solid fa-id-card"></i> ID
+            </a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="11" class="px-4 py-10 text-center text-slate-500">No students found.</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 {% include "partials/pagination.html" %}
