@@ -1,39 +1,67 @@
 {% extends base_template %}{% load ui_extras %}
 {% block title %}{{ title }}{% endblock %}
-{% block page_heading %}{{ title }}{% endblock %}
+
+<!-- Dynamic Page Heading in Top Navbar -->
+{% block page_heading %}
+  {% if title == "Users" %}User Management{% else %}{{ title }}{% endif %}
+{% endblock %}
+
+<!-- Dynamic Page Subtitle in Top Navbar -->
+{% block page_subtitle %}
+  {% if title == "Users" %}Manage system users, account permissions, and access status.{% else %}Manage {{ title|lower }}.{% endif %}
+{% endblock %}
 
 {% block content %}
 <section>
 
-  <div class="app-heading">
+  <!-- Removed Duplicate Heading Here -->
+  
+  <!-- Page Controls -->
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <div>
-      <h2>{{ title }}</h2>
-      <p>Manage {{ title|lower }}</p>
+      <!-- No Heading -->
     </div>
     {% if create_url %}
       <a href="{{ create_url }}" class="app-btn-primary">
-        <i class="fa-solid fa-plus"></i> Add {{ singular }}
+        <i class="fa-solid fa-plus"></i> 
+        {% if singular == "User" %}Add New User{% else %}Add New {{ singular }}{% endif %}
       </a>
     {% endif %}
   </div>
 
+  <!-- Search Bar -->
   {% if searchable %}
   <form method="get" class="app-toolbar">
     <div class="app-search">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input name="q" value="{{ q }}" placeholder="Search...">
+      <input name="q" value="{{ q }}" placeholder="{% if title == 'Users' %}Search by username, name, or email...{% else %}Search...{% endif %}">
     </div>
-    <button class="app-btn-light"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+    <button class="app-btn-light">
+      <i class="fa-solid fa-magnifying-glass"></i> 
+      {% if title == "Users" %}Search Users{% else %}Search{% endif %}
+    </button>
     {% if q %}<a href="?" class="app-btn-light">Clear</a>{% endif %}
   </form>
   {% endif %}
 
+  <!-- Table -->
   <div class="app-table-card">
     <div class="app-table-scroll">
       <table class="app-table">
         <thead>
           <tr>
-            {% for label, path in columns %}<th>{{ label }}</th>{% endfor %}
+            {% for label, path in columns %}
+              <th>
+                {% if title == "Users" %}
+                  {% if label == "Username" %}Username
+                  {% elif label == "Name" %}Full Name
+                  {% elif label == "Email" %}Email Address
+                  {% elif label == "Role" %}User Role
+                  {% elif label == "Active" %}Account Status
+                  {% else %}{{ label }}{% endif %}
+                {% else %}{{ label }}{% endif %}
+              </th>
+            {% endfor %}
             <th class="text-center">Actions</th>
           </tr>
         </thead>
@@ -41,17 +69,25 @@
           {% for obj in object_list %}
           <tr>
             {% for label, path in columns %}
-              <td data-label="{{ label }}">{{ obj|attr:path }}</td>
+              <td data-label="{{ label }}">
+                {% if path == "get_role_display" %}
+                  {% if obj.get_role_display == "Parent" %}Parent / Guardian
+                  {% elif obj.get_role_display == "Admin" %}Administrator
+                  {% else %}{{ obj.get_role_display }}{% endif %}
+                {% else %}
+                  {{ obj|attr:path }}
+                {% endif %}
+              </td>
             {% endfor %}
             <td data-label="Actions">
               <div class="app-actions">
                 {% if detail_name %}
-                  <a href="{% url detail_name obj.pk %}" class="app-action-btn" title="View">
+                  <a href="{% url detail_name obj.pk %}" class="app-action-btn" title="View Details">
                     <i class="fa-regular fa-eye"></i>
                   </a>
                 {% endif %}
                 {% if update_name %}
-                  <a href="{% url update_name obj.pk %}" class="app-action-btn" title="Edit">
+                  <a href="{% url update_name obj.pk %}" class="app-action-btn" title="Edit Details">
                     <i class="fa-regular fa-pen-to-square"></i>
                   </a>
                 {% endif %}
@@ -68,7 +104,7 @@
             <td colspan="{{ columns|length|add:1 }}">
               <div class="app-empty">
                 <i class="fa-regular fa-folder-open"></i>
-                <strong>No records found</strong>
+                <strong>No records found.</strong>
                 <p>Try adjusting your search or filters.</p>
               </div>
             </td>

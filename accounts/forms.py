@@ -22,10 +22,23 @@ class TailwindFormMixin:
                 widget.attrs.setdefault("class", base)
 
 
-class LoginForm(TailwindFormMixin, AuthenticationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={"autofocus": True}))
-    password = forms.CharField(widget=forms.PasswordInput)
+# Notice: LoginForm does NOT inherit from TailwindFormMixin
+# In accounts/forms.py
 
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={
+            "autofocus": True,
+            "autocomplete": "username",
+            "placeholder": "Username",
+        })
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            "autocomplete": "current-password",
+            "placeholder": "Password",
+        })
+    )
 
 class UserAdminForm(TailwindFormMixin, forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput, required=False, help_text="Leave blank to keep the current password.")

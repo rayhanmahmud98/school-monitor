@@ -1,33 +1,31 @@
 {% extends base_template %}
-{% block title %}My students{% endblock %}
+{% block title %}Students{% endblock %}
+
 {% block page_heading %}Students{% endblock %}
+{% block page_subtitle %}Manage student records and academic information.{% endblock %}
 
 {% block content %}
 <section>
 
-  <!-- Page heading -->
-  <div class="app-heading">
+  <!-- Page Controls (Heading removed to avoid duplicate) -->
+  <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <div>
-      <h2>Students</h2>
-      <p>Manage student records and academic information</p>
+      <!-- No Heading -->
     </div>
     {% if role == 'ADMIN' %}
       <a href="{% url 'students:student_create' %}" class="app-btn-primary">
-        <i class="fa-solid fa-plus"></i> Add Student
+        <i class="fa-solid fa-plus"></i> Add New Student
       </a>
     {% endif %}
   </div>
 
-  <!-- Search and filters -->
+  <!-- Search and Filters -->
   <form method="get" class="app-toolbar">
-    
-    <!-- Search Input -->
     <div class="app-search">
       <i class="fa-solid fa-magnifying-glass"></i>
       <input type="search" name="q" value="{{ q }}" placeholder="Search by name, ID, roll, or guardian...">
     </div>
     
-    <!-- Class Filter -->
     <select name="class" class="app-filter">
       <option value="">All Classes</option>
       {% for c in classes %}
@@ -37,14 +35,12 @@
       {% endfor %}
     </select>
 
-    <!-- Sort Dropdown -->
     <select name="sort" class="app-filter">
       {% for key, label in sort_options %}
         <option value="{{ key }}" {% if sort == key %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
     
-    <!-- Action Buttons -->
     <button type="submit" class="app-btn-light" style="border-color: var(--app-purple); color: var(--app-purple);">
       <i class="fa-solid fa-filter"></i> Apply
     </button>
@@ -52,7 +48,7 @@
     <a href="?" class="app-btn-light">Reset</a>
   </form>
 
-  <!-- Student table -->
+  <!-- Student Table -->
   <div class="app-table-card">
     <div class="app-table-scroll">
       <table class="app-table">
@@ -97,10 +93,10 @@
             
             <td data-label="Actions">
               <div class="app-actions">
-                <a href="{% url 'students:student_profile' s.pk %}" class="app-action-btn" title="View Profile">
-                  <i class="fa-regular fa-id-card"></i>
+                <a href="{% url 'students:student_profile' s.pk %}" class="app-action-btn" title="View Details">
+                  <i class="fa-regular fa-eye"></i>
                 </a>
-                <a href="{% url 'students:student_update' s.pk %}" class="app-action-btn" title="Edit Student">
+                <a href="{% url 'students:student_update' s.pk %}" class="app-action-btn" title="Edit Details">
                   <i class="fa-regular fa-pen-to-square"></i>
                 </a>
               </div>
@@ -110,8 +106,8 @@
           <tr>
             <td colspan="7">
               <div class="app-empty">
-                <i class="fa-regular fa-folder-open"></i>
-                <strong>No students found</strong>
+                <i class="fa-solid fa-user-graduate"></i>
+                <strong>No records found.</strong>
                 <p>Try changing your search or class filter.</p>
               </div>
             </td>

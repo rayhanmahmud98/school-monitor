@@ -1,42 +1,59 @@
-
 /* =========================================================
-   SCHOOL MONITOR — PREMIUM UI SYSTEM
-   Shared styles for tables, forms, cards, buttons and mobile
+   SCHOOL MONITOR — PREMIUM CSS REFRESH
+   CSS-only replacement. Existing class names are preserved.
+   No HTML, Django, JavaScript, or backend changes required.
    ========================================================= */
 
+/* 1. DESIGN TOKENS */
 :root {
-  --app-purple: #6d5dfc;
-  --app-purple-dark: #5545e8;
+  --app-purple: #6958f5;
+  --app-purple-dark: #5141df;
   --app-purple-soft: #f1efff;
+  --app-purple-border: #dcd7ff;
 
-  --app-text: #20243a;
-  --app-heading: #18213a;
-  --app-muted: #7d879d;
+  --app-navy: #111a2d;
+  --app-navy-soft: #1b2740;
+  --app-text: #273149;
+  --app-heading: #17223b;
+  --app-muted: #78849b;
+  --app-subtle: #9aa4b6;
 
-  --app-border: #e6e9f2;
+  --app-border: #e5e9f1;
+  --app-border-strong: #d9dfeb;
   --app-surface: #ffffff;
-  --app-page: #f7f8fc;
+  --app-page: #f6f8fc;
+  --app-surface-soft: #fafbfe;
 
   --app-green: #087b4b;
-  --app-green-bg: #dcfce9;
+  --app-green-bg: #e6f7ee;
   --app-red: #c92f43;
-  --app-red-bg: #ffe6e9;
-  --app-yellow: #886600;
-  --app-yellow-bg: #fff4bd;
+  --app-red-bg: #fff0f1;
+  --app-yellow: #896400;
+  --app-yellow-bg: #fff7dc;
+  --app-blue: #2863bd;
+  --app-blue-bg: #edf4ff;
 
+  --app-radius-sm: 8px;
   --app-radius: 12px;
-  --app-shadow: 0 3px 14px rgba(26, 35, 65, .035);
-  --app-shadow-hover: 0 8px 24px rgba(26, 35, 65, .07);
+  --app-radius-lg: 16px;
+
+  --app-shadow-xs: 0 1px 2px rgba(25, 35, 58, .04);
+  --app-shadow: 0 3px 12px rgba(25, 35, 58, .045);
+  --app-shadow-hover: 0 8px 22px rgba(25, 35, 58, .085);
+  --app-focus: 0 0 0 3px rgba(105, 88, 245, .14);
 }
 
-/* =========================================================
-   1. GLOBAL RESETS
-   ========================================================= */
-
+/* 2. BASE & RESETS */
 html {
   min-height: 100%;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
@@ -45,65 +62,69 @@ body {
   overflow-x: clip;
   color: var(--app-text);
   background: var(--app-page);
-  font-family: Inter, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-img, svg, video, canvas {
+img,
+svg,
+video,
+canvas {
   max-width: 100%;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font: inherit;
 }
 
-button, a {
+button,
+a {
   -webkit-tap-highlight-color: transparent;
 }
 
 :focus-visible {
-  outline: 3px solid rgba(109, 93, 252, .28);
-  outline-offset: 3px;
+  outline: 3px solid rgba(105, 88, 245, .28);
+  outline-offset: 2px;
 }
 
-p, h1, h2, h3, h4 {
+p,
+h1,
+h2,
+h3,
+h4 {
   overflow-wrap: anywhere;
 }
 
-/* =========================================================
-   2. PAGE HEADINGS
-   ========================================================= */
-
+/* 3. PAGE & SECTION HEADINGS */
 .app-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 20px;
+  margin: 0 0 20px;
 }
 
 .app-heading h2 {
   margin: 0;
   color: var(--app-heading);
-  font-size: clamp(17px, 1.5vw, 21px);
+  font-size: clamp(18px, 1.5vw, 22px);
   font-weight: 750;
-  line-height: 1.35;
-  letter-spacing: -.45px;
+  line-height: 1.3;
+  letter-spacing: -.55px;
 }
 
 .app-heading p {
   margin: 5px 0 0;
   color: var(--app-muted);
   font-size: 12px;
-  line-height: 1.6;
+  line-height: 1.55;
 }
-
-/* Optional section heading */
 
 .app-section-heading {
   display: flex;
@@ -111,7 +132,7 @@ p, h1, h2, h3, h4 {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  margin: 22px 0 12px;
+  margin: 24px 0 13px;
 }
 
 .app-section-heading h3 {
@@ -119,43 +140,43 @@ p, h1, h2, h3, h4 {
   color: var(--app-heading);
   font-size: 14px;
   font-weight: 700;
+  letter-spacing: -.15px;
 }
 
-/* =========================================================
-   3. BUTTON SYSTEM
-   ========================================================= */
-
+/* 4. BUTTONS */
 .app-btn-primary,
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 36px;
-  padding: 9px 15px;
+  min-height: 38px;
+  padding: 9px 16px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 9px;
   color: #fff;
-  background: var(--app-purple);
+  background: linear-gradient(135deg, #7667ff 0%, var(--app-purple) 100%);
+  box-shadow: 0 2px 5px rgba(105, 88, 245, .16);
   font-size: 12px;
   font-weight: 650;
   line-height: 1.3;
   text-decoration: none;
   cursor: pointer;
-  transition: background .18s ease, box-shadow .18s ease,
-    transform .18s ease;
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 
 .app-btn-primary:hover,
 .btn-primary:hover {
   color: #fff;
   background: var(--app-purple-dark);
-  box-shadow: 0 4px 12px rgba(109, 93, 252, .18);
+  box-shadow: 0 5px 13px rgba(105, 88, 245, .22);
+  transform: translateY(-1px);
 }
 
 .app-btn-primary:active,
 .btn-primary:active {
-  transform: translateY(1px);
+  transform: translateY(0);
+  box-shadow: var(--app-shadow-xs);
 }
 
 .app-btn-light,
@@ -164,42 +185,43 @@ p, h1, h2, h3, h4 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 36px;
-  padding: 8px 13px;
-  border: 1px solid var(--app-border);
-  border-radius: 8px;
-  color: #4b556d;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 9px;
+  color: #536078;
   background: #fff;
+  box-shadow: var(--app-shadow-xs);
   font-size: 12px;
-  font-weight: 550;
+  font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  transition: border-color .18s ease, background .18s ease,
-    color .18s ease;
+  transition: border-color .18s ease, background .18s ease, color .18s ease, box-shadow .18s ease;
 }
 
 .app-btn-light:hover,
 .btn-light:hover {
   color: var(--app-purple-dark);
   border-color: #c9c1ff;
-  background: #faf9ff;
+  background: #fbfaff;
+  box-shadow: 0 2px 8px rgba(105, 88, 245, .07);
 }
-
-/* Destructive actions */
 
 .app-btn-danger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  min-height: 32px;
-  padding: 7px 11px;
-  border: 1px solid #f3cbd1;
-  border-radius: 7px;
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid #f1cbd1;
+  border-radius: 8px;
   color: var(--app-red);
   background: #fff;
   font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
+  transition: color .18s ease, border-color .18s ease, background .18s ease;
 }
 
 .app-btn-danger:hover {
@@ -208,17 +230,14 @@ p, h1, h2, h3, h4 {
   background: var(--app-red);
 }
 
-/* =========================================================
-   4. SEARCH & FILTER TOOLBAR
-   ========================================================= */
-
+/* 5. SEARCH & FILTER TOOLBAR */
 .app-toolbar {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
   padding: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 15px;
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius);
   background: var(--app-surface);
@@ -228,27 +247,26 @@ p, h1, h2, h3, h4 {
 .app-search {
   display: flex;
   align-items: center;
-  flex: 1 1 220px;
+  flex: 1 1 240px;
   gap: 10px;
   min-width: 0;
-  height: 38px;
-  padding: 0 12px;
+  height: 40px;
+  padding: 0 13px;
   border: 1px solid var(--app-border);
-  border-radius: 8px;
-  background: #fafbff;
-  transition: border-color .18s, box-shadow .18s,
-    background .18s;
+  border-radius: 9px;
+  background: var(--app-surface-soft);
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
 }
 
 .app-search:focus-within {
-  border-color: #b8afff;
+  border-color: #b9b0ff;
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(109, 93, 252, .08);
+  box-shadow: var(--app-focus);
 }
 
 .app-search > i {
   flex-shrink: 0;
-  color: #969eb2;
+  color: #929cb0;
   font-size: 13px;
 }
 
@@ -266,32 +284,31 @@ p, h1, h2, h3, h4 {
 }
 
 .app-search input::placeholder {
-  color: #a0a7b8;
+  color: #9ba5b7;
 }
 
 .app-filter {
   width: auto;
-  max-width: 190px;
-  min-width: 120px;
-  height: 38px;
-  padding: 0 11px;
+  max-width: 200px;
+  min-width: 125px;
+  height: 40px;
+  padding: 0 12px;
   border: 1px solid var(--app-border);
-  border-radius: 8px;
-  color: #535d74;
+  border-radius: 9px;
+  color: #536078;
   background: #fff;
   font-size: 12px;
   cursor: pointer;
+  transition: border-color .18s ease, box-shadow .18s ease;
 }
 
 .app-filter:focus {
-  border-color: #b8afff;
+  border-color: #b9b0ff;
   outline: none;
+  box-shadow: var(--app-focus);
 }
 
-/* =========================================================
-   5. TABLE CARD & TABLE
-   ========================================================= */
-
+/* 6. CARDS & TABLE CONTAINERS */
 .app-table-card,
 .app-card,
 .card {
@@ -307,12 +324,35 @@ p, h1, h2, h3, h4 {
   overflow: hidden;
 }
 
+.app-card,
+.card {
+  padding: 19px;
+}
+
+.app-card h3,
+.app-card h4 {
+  margin-top: 0;
+  color: var(--app-heading);
+  font-weight: 700;
+  letter-spacing: -.2px;
+}
+
+/* 7. TABLES */
 .app-table-scroll {
   width: 100%;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scrollbar-width: thin;
-  scrollbar-color: #d5d8e6 transparent;
+  scrollbar-color: #d7dbea transparent;
+}
+
+.app-table-scroll::-webkit-scrollbar {
+  height: 7px;
+}
+
+.app-table-scroll::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #d7dbea;
 }
 
 .app-table {
@@ -326,28 +366,28 @@ p, h1, h2, h3, h4 {
 }
 
 .app-table thead th {
-  height: 42px;
-  padding: 0 13px !important;
+  height: 44px;
+  padding: 0 14px !important;
   border-bottom: 1px solid var(--app-border) !important;
-  color: #737d95 !important;
-  background: #fafbfe !important;
+  color: #758098 !important;
+  background: #f9faff !important;
   font-size: 10px !important;
-  font-weight: 700 !important;
+  font-weight: 750 !important;
   text-transform: uppercase;
-  letter-spacing: .35px;
+  letter-spacing: .45px;
   white-space: nowrap;
 }
 
 .app-table thead th i {
   margin-left: 4px;
-  color: #a2a9ba;
+  color: #a2aabd;
 }
 
 .app-table tbody td {
-  height: 52px;
-  padding: 8px 13px !important;
-  border-bottom: 1px solid #edf0f6 !important;
-  color: #505a72;
+  height: 53px;
+  padding: 9px 14px !important;
+  border-bottom: 1px solid #edf0f5 !important;
+  color: #536078;
   vertical-align: middle;
   white-space: nowrap;
 }
@@ -364,20 +404,15 @@ p, h1, h2, h3, h4 {
   background: #faf9ff;
 }
 
-/* Optional highlighted row */
-
 .app-table tbody tr.row-highlight td {
-  background: #fff0f1;
+  background: #fff2f3;
 }
 
 .app-table tbody tr.row-highlight:hover td {
-  background: #ffe8eb;
+  background: #ffe9ec;
 }
 
-/* =========================================================
-   6. PERSON / STUDENT IDENTITY
-   ========================================================= */
-
+/* 8. PERSON / STUDENT IDENTITY */
 .app-person {
   display: flex;
   align-items: center;
@@ -389,14 +424,14 @@ p, h1, h2, h3, h4 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 35px;
-  height: 35px;
-  flex: 0 0 35px;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
   overflow: hidden;
-  border: 1px solid #e8e7ff;
+  border: 1px solid #e5e1ff;
   border-radius: 50%;
   color: #5c50d9;
-  background: #efedff;
+  background: #f0eeff;
   font-size: 12px;
   font-weight: 750;
   text-transform: uppercase;
@@ -412,9 +447,9 @@ img.app-avatar {
 
 .app-person-info strong {
   display: block;
-  max-width: 190px;
+  max-width: 200px;
   overflow: hidden;
-  color: #27314a;
+  color: #273149;
   font-size: 12px;
   font-weight: 650;
   text-overflow: ellipsis;
@@ -422,48 +457,46 @@ img.app-avatar {
 
 .app-person-info span {
   display: block;
-  margin-top: 4px;
-  color: #8a93a8;
+  margin-top: 3px;
+  color: #8b95a9;
   font-size: 10px;
 }
 
-/* =========================================================
-   7. STATUS BADGES
-   ========================================================= */
-
+/* 9. STATUS BADGES */
 .app-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 58px;
-  padding: 5px 9px;
+  min-width: 62px;
+  padding: 5px 10px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 999px;
   font-size: 10px;
-  font-weight: 650;
+  font-weight: 700;
+  line-height: 1.25;
   white-space: nowrap;
 }
 
 .status-active {
   color: var(--app-green);
+  border-color: #cceedd;
   background: var(--app-green-bg);
 }
 
 .status-inactive,
 .status-suspended {
   color: var(--app-red);
+  border-color: #f6d5d9;
   background: var(--app-red-bg);
 }
 
 .status-pending {
   color: var(--app-yellow);
+  border-color: #f3e5ad;
   background: var(--app-yellow-bg);
 }
 
-/* =========================================================
-   8. TABLE ACTIONS
-   ========================================================= */
-
+/* 10. TABLE ACTIONS */
 .app-actions {
   display: flex;
   align-items: center;
@@ -475,28 +508,29 @@ img.app-avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  border: 1px solid #e0e4ee;
-  border-radius: 7px;
-  color: #727c93;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e1e6ef;
+  border-radius: 8px;
+  color: #718098;
   background: #fff;
   text-decoration: none;
   font-size: 12px;
   cursor: pointer;
-  transition: all .16s ease;
+  transition: color .16s ease, border-color .16s ease, background .16s ease, transform .16s ease;
 }
 
 .app-action-btn:hover {
   color: var(--app-purple-dark);
-  border-color: #c9c1ff;
+  border-color: #cfc8ff;
   background: var(--app-purple-soft);
+  transform: translateY(-1px);
 }
 
 .app-action-btn.delete {
   color: var(--app-red);
-  border-color: #f2d1d6;
-  background: #fff8f8;
+  border-color: #f3d2d7;
+  background: #fffafa;
 }
 
 .app-action-btn.delete:hover {
@@ -505,36 +539,21 @@ img.app-avatar {
   background: var(--app-red);
 }
 
-/* =========================================================
-   9. CARDS & FORMS
-   ========================================================= */
-
-.app-card,
-.card {
-  padding: 18px;
-}
-
-.app-card h3,
-.app-card h4 {
-  margin-top: 0;
-  color: var(--app-heading);
-  font-weight: 700;
-}
-
+/* 11. FORM CONTROLS */
 .input,
 .app-input,
 .app-card input:not([type="checkbox"]):not([type="radio"]),
 .app-card select,
 .app-card textarea {
   width: 100%;
-  min-height: 38px;
-  padding: 9px 11px;
+  min-height: 40px;
+  padding: 9px 12px;
   border: 1px solid #dfe4ee;
-  border-radius: 8px;
+  border-radius: 9px;
   color: var(--app-text);
   background: #fff;
   font-size: 12px;
-  transition: border-color .16s, box-shadow .16s;
+  transition: border-color .16s ease, box-shadow .16s ease;
 }
 
 .input:focus,
@@ -542,70 +561,68 @@ img.app-avatar {
 .app-card input:focus,
 .app-card select:focus,
 .app-card textarea:focus {
-  border-color: #b6adff;
+  border-color: #b9b0ff;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(109, 93, 252, .09);
+  box-shadow: var(--app-focus);
 }
 
 .app-card label {
   display: block;
   margin-bottom: 6px;
-  color: #59647b;
+  color: #56627a;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 650;
 }
 
-/* =========================================================
-   10. EMPTY STATES & MESSAGES
-   ========================================================= */
-
+/* 12. EMPTY STATES & MESSAGES */
 .app-empty {
   display: flex;
-  min-height: 170px;
+  min-height: 180px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 9px;
-  padding: 24px;
+  padding: 26px;
   color: var(--app-muted);
   text-align: center;
 }
 
 .app-empty > i {
-  color: #b6adff;
-  font-size: 28px;
+  color: #aaa1ff;
+  font-size: 29px;
 }
 
 .app-empty strong {
   color: var(--app-heading);
   font-size: 13px;
+  font-weight: 700;
 }
 
 .app-empty p {
+  max-width: 420px;
   margin: 0;
   font-size: 11px;
+  line-height: 1.6;
 }
 
 .app-message {
-  padding: 12px 14px;
-  margin-bottom: 14px;
+  padding: 13px 15px;
+  margin-bottom: 15px;
   border: 1px solid var(--app-border);
-  border-radius: 9px;
+  border-radius: 10px;
   background: #fff;
+  box-shadow: var(--app-shadow-xs);
   font-size: 12px;
 }
 
-/* =========================================================
-   11. PAGINATION
-   ========================================================= */
-
+/* 13. PAGINATION */
 .app-pagination {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  padding: 12px 2px;
+  padding: 13px 2px;
 }
 
 .app-pagination-info {
@@ -624,43 +641,42 @@ img.app-avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 30px;
-  height: 30px;
-  padding: 0 8px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid transparent;
   border-radius: 8px;
-  color: #626c83;
+  color: #626d84;
   background: transparent;
   text-decoration: none;
   font-size: 11px;
+  transition: color .16s ease, background .16s ease, border-color .16s ease;
 }
 
 .app-pagination-links a:hover {
   color: var(--app-purple-dark);
+  border-color: var(--app-purple-border);
   background: var(--app-purple-soft);
 }
 
 .app-pagination-links .current {
   color: #fff;
+  border-color: var(--app-purple);
   background: var(--app-purple);
   font-weight: 700;
+  box-shadow: 0 2px 6px rgba(105, 88, 245, .18);
 }
 
-/* =========================================================
-   12. RESPONSIVE TABLES
-   ========================================================= */
-
-/* Default mobile behavior: retain horizontal scrolling.
-   This preserves column alignment and table readability. */
-
+/* 14. RESPONSIVE BEHAVIOR */
 @media (max-width: 768px) {
   .app-heading {
     align-items: flex-start;
     gap: 12px;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
   }
 
   .app-heading h2 {
-    font-size: 17px;
+    font-size: 18px;
   }
 
   .app-heading p {
@@ -677,7 +693,7 @@ img.app-avatar {
   }
 
   .app-filter {
-    flex: 1 1 120px;
+    flex: 1 1 125px;
     max-width: none;
     min-width: 0;
   }
@@ -688,7 +704,7 @@ img.app-avatar {
 
   .app-card,
   .card {
-    padding: 13px;
+    padding: 14px;
   }
 
   .app-pagination {
@@ -715,19 +731,28 @@ img.app-avatar {
   }
 
   .app-action-btn {
-    width: 32px;
-    height: 32px;
+    width: 33px;
+    height: 33px;
   }
 }
 
-/* Reduced motion accessibility */
-
+/* 15. ACCESSIBILITY & MOTION */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     scroll-behavior: auto !important;
     animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
+}
+
+/* Preserve readable text when browser autofill is active. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #fff inset !important;
+  -webkit-text-fill-color: #17223b !important;
 }

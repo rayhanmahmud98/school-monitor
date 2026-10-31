@@ -26,8 +26,13 @@ class RoleLoginView(LoginView):
 users = build_crud(
     ns="accounts", name="user", slug="users", model_class=User, form_cls=UserAdminForm,
     title="Users", singular="User",
-    columns=[("Username", "username"), ("Name", "display_name"), ("Email", "email"),
-             ("Role", "get_role_display"), ("Active", "is_active")],
+    columns=[
+        ("Username", "username"),
+        ("Full Name", "display_name"),
+        ("Email Address", "email"),
+        ("User Role", "get_role_display"),
+        ("Account Status", "is_active"),
+    ],
     search_fields=("username", "first_name", "last_name", "email"),
     ordering=("role", "username"),
     can_delete=lambda obj, request: (obj.pk != request.user.pk and not obj.is_primary_admin),
@@ -63,17 +68,25 @@ class TeacherUpdateView(RoleBasedAccessMixin, UpdateView):
         return ctx
 
 
-# Updated columns to include Employee ID, Blood, and rename Active to Status
 teachers = build_crud(
     ns="accounts", name="teacher", slug="teachers", model_class=User, form_cls=TeacherForm,
     title="Teachers", singular="Teacher",
-    columns=[("User ID", "username"), ("Name", "display_name"), ("Employee ID", "teacher_profile.employee_id"),
-             ("Email", "email"), ("Phone", "teacher_profile.phone"),
-             ("Designation", "teacher_profile.designation"), ("Specialization", "teacher_profile.subject_specialization"),
-             ("Blood", "teacher_profile.blood_group"), ("Status", "is_active")],
-    search_fields=("username", "first_name", "last_name", "email",
-                   "teacher_profile__employee_id", "teacher_profile__phone", 
-                   "teacher_profile__designation", "teacher_profile__subject_specialization"),
+    columns=[
+        ("User ID", "username"),
+        ("Full Name", "display_name"),
+        ("Employee ID", "teacher_profile.employee_id"),
+        ("Email Address", "email"),
+        ("Phone", "teacher_profile.phone"),
+        ("Designation", "teacher_profile.designation"),
+        ("Specialization", "teacher_profile.subject_specialization"),
+        ("Blood Group", "teacher_profile.blood_group"),
+        ("Account Status", "is_active"),
+    ],
+    search_fields=(
+        "username", "first_name", "last_name", "email",
+        "teacher_profile__employee_id", "teacher_profile__phone",
+        "teacher_profile__designation", "teacher_profile__subject_specialization",
+    ),
     select_related=("teacher_profile",),
     ordering=("first_name", "last_name"),
     allow_create=True,
@@ -86,10 +99,15 @@ teachers = build_crud(
 links = build_crud(
     ns="accounts", name="link", slug="links", model_class=ParentStudentLink,
     form_cls=ParentStudentLinkForm, title="Parent-Student Links", singular="Link",
-    columns=[("Parent", "parent.display_name"), ("Student", "student.full_name"),
-             ("Class", "student.class_ref"), ("Relationship", "relationship")],
+    columns=[
+        ("Parent / Guardian", "parent.display_name"),
+        ("Student", "student.full_name"),
+        ("Class", "student.class_ref"),
+        ("Relationship", "relationship"),
+    ],
     search_fields=("parent__username", "parent__first_name", "student__full_name"),
-    select_related=("parent", "student", "student__class_ref"), allow_update=False,
+    select_related=("parent", "student", "student__class_ref"),
+    allow_update=False,
 )
 
 
@@ -101,10 +119,14 @@ def login_history(request):
     date_from = request.GET.get("from", "").strip()
     date_to = request.GET.get("to", "").strip()
 
-    if q: qs = qs.filter(user__username__icontains=q)
-    if user_id.isdigit(): qs = qs.filter(user_id=user_id)
-    if date_from: qs = qs.filter(timestamp__date__gte=date_from)
-    if date_to: qs = qs.filter(timestamp__date__lte=date_to)
+    if q:
+        qs = qs.filter(user__username__icontains=q)
+    if user_id.isdigit():
+        qs = qs.filter(user_id=user_id)
+    if date_from:
+        qs = qs.filter(timestamp__date__gte=date_from)
+    if date_to:
+        qs = qs.filter(timestamp__date__lte=date_to)
 
     page_obj, querystring = paginate(request, qs, 50)
 
@@ -118,7 +140,9 @@ def login_history(request):
 def teacher_profile(request, pk):
     if request.user.role == "TEACHER" and request.user.pk != pk:
         raise PermissionDenied
-    teacher = get_object_or_404(User.objects.filter(role="TEACHER").select_related("teacher_profile"), pk=pk)
+    teacher = get_object_or_404(
+        User.objects.filter(role="TEACHER").select_related("teacher_profile"), pk=pk
+    )
     subjects = teacher.subjects.all()
     return render(request, "accounts/teacher_profile.html", {
         "teacher": teacher, "subjects": subjects
@@ -132,10 +156,10 @@ def teacher_id_card(request, pk):
     pdf = render_teacher_id_cards_pdf([teacher], request=request, profile=profile)
     filename = f"teacher_id_{teacher.username}.pdf"
     return FileResponse(
-        iter([pdf]), 
-        content_type="application/pdf", 
-        as_attachment=True, 
-        filename=filename
+        iter([pdf]),
+        content_type="application/pdf",
+        as_attachment=True,
+        filename=filename,
     )
 
 
