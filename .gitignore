@@ -1,37 +1,17 @@
 # Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-.pytest_cache/
-
-# Virtual environments
+*$py.class
 venv/
-env/
 .venv/
+env/
 
 # Django
-*.log
 db.sqlite3
 db.sqlite3-journal
-db.sqlite3.bak*
-*.sqlite3
-*.sqlite3-*
+/media/
+/staticfiles/
 
-# Media (user uploads)
-media/
-!media/.gitkeep
-
-# Environment / secrets
-.env
-.env.*
-
-# Editors / OS
-.idea/
-.vscode/
-*.swp
+# OS
 .DS_Store
 Thumbs.db
-
-# Backups
-*.bak
-*.orig
