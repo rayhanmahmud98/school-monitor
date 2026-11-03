@@ -15,3 +15,8 @@ db.sqlite3-journal
 # OS
 .DS_Store
 Thumbs.db
+# Security & Secrets
+.env
+local_backup.json
+neon_import.sql
+*.bak
