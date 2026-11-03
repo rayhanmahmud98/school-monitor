@@ -49,7 +49,8 @@ exams = build_crud(
 years = build_crud(
     ns="academics", name="year", slug="settings/years", model_class=AcademicYear,
     form_cls=AcademicYearForm, title="Academic Years", singular="Academic year",
-    columns=[("Academic year", "name"), ("Current", "is_current")],
+    columns=[("Academic year", "name"), ("Start", "start_date"), ("End", "end_date"),
+             ("Current", "is_current")],
 )
 scales = build_crud(
     ns="academics", name="scale", slug="settings/grading", model_class=GradeScale,

@@ -1,0 +1,38 @@
+{% extends base_template %}
+{% load finance_tags %}
+{% block title %}Discount awards{% endblock %}
+{% block content %}
+<section>
+  <div class="app-heading"><div><h2>Discount awards</h2><p>Scholarships, waivers and other discounts given to students</p></div>
+    <a href="{% url 'finance:award_create' %}" class="app-btn-primary"><i class="fa-solid fa-plus"></i> Award a discount</a></div>
+  <form method="get" class="app-toolbar mb-4">
+    <select name="status" class="app-input" onchange="this.form.submit()"><option value="">All</option>
+      {% for v, l in statuses %}<option value="{{ v }}" {% if status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+  </form>
+  <div class="app-table-card"><div class="app-table-scroll">
+    <table class="app-table">
+      <thead><tr><th>Student</th><th>Rule</th><th>Valid</th><th>Awarded by</th><th>Status</th><th class="text-center">Decision</th></tr></thead>
+      <tbody>
+      {% for a in page_obj %}
+        <tr>
+          <td data-label="Student">{{ a.student.full_name }}<div class="text-xs text-slate-500">{{ a.student.class_ref }}</div></td>
+          <td data-label="Rule">{{ a.rule.name }}</td>
+          <td data-label="Valid">{{ a.valid_from|date:"d M Y" }}{% if a.valid_to %} to {{ a.valid_to|date:"d M Y" }}{% endif %}</td>
+          <td data-label="Awarded by">{{ a.awarded_by.display_name|default:"-" }}</td>
+          <td data-label="Status"><span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold {% if a.approval_status == 'APPROVED' %}bg-emerald-100 text-emerald-800{% elif a.approval_status == 'PENDING' %}bg-amber-100 text-amber-800{% else %}bg-red-100 text-red-800{% endif %}">{{ a.get_approval_status_display }}</span></td>
+          <td data-label="Decision" class="text-center">
+            {% if a.approval_status == 'PENDING' and request.user|can:"approve_discount" %}
+              <form method="post" action="{% url 'finance:award_decide' a.pk %}" class="inline">{% csrf_token %}
+                <button name="decision" value="APPROVED" class="app-btn-light">Approve</button>
+                <button name="decision" value="REJECTED" class="app-btn-light">Reject</button>
+              </form>
+            {% else %}-{% endif %}
+          </td>
+        </tr>
+      {% empty %}<tr><td colspan="6" class="text-center text-slate-500 py-8">No awards.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+  {% include "partials/pagination.html" %}
+</section>
+{% endblock %}

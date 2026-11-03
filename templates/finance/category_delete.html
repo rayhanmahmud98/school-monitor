@@ -1,0 +1,24 @@
+{% extends base_template %}
+{% block title %}Delete fee category{% endblock %}
+{% block content %}
+<div class="card mx-auto mt-10 max-w-lg p-8">
+  <h1 class="text-xl font-bold"><i class="fa-solid fa-tags mr-2"></i>{{ category.name }} ({{ category.code }})</h1>
+  <h2 class="mt-4 text-sm font-semibold text-slate-600">Where this category is used</h2>
+  <ul class="mt-2 text-sm text-slate-600">
+    {% for label, n in usage.items %}<li>{{ label }}: <strong>{{ n }}</strong></li>{% endfor %}
+  </ul>
+  {% if deletable %}
+    <p class="mt-4 text-slate-600">Nothing uses this category, so it can be deleted safely.</p>
+    <form method="post" class="mt-6 flex gap-3">{% csrf_token %}
+      <button class="btn-danger">Delete permanently</button>
+      <a href="{% url 'finance:category_list' %}" class="btn-light">Cancel</a>
+    </form>
+  {% else %}
+    <p class="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">Financial history depends on this category, so it cannot be deleted. Archive it instead: it disappears from pickers and new billing, but old invoices keep their original names and amounts.</p>
+    <form method="post" action="{% url 'finance:category_status' category.pk %}" class="mt-6 flex gap-3">{% csrf_token %}
+      <button name="status" value="ARCHIVED" class="btn-primary">Archive category</button>
+      <a href="{% url 'finance:category_list' %}" class="btn-light">Back</a>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

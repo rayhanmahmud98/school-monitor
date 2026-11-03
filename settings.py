@@ -1,27 +1,48 @@
 """
 Django settings for school_monitor.
-
-LOCAL DEVELOPMENT: Uses SQLite, DEBUG=True, and local static files.
-PRODUCTION (Render): Uses PostgreSQL, DEBUG=False, and WhiteNoise for static files.
 """
 import os
 from pathlib import Path
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
 
-# --- SECURITY & ENVIRONMENT ---
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY", 
-    "django-insecure-local-development-key-do-not-use-in-production"
-)
-DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get(
-    "DJANGO_ALLOWED_HOSTS", 
-    "localhost,127.0.0.1,[::1]"
-).split(",")
+def _load_dotenv(path):
+    if not path.exists():
+        return
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        line = raw.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
+_load_dotenv(BASE_DIR / ".env")
+
+
+def _env_bool(name, default=False):
+    return os.environ.get(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_list(name, default=""):
+    return [v.strip() for v in os.environ.get(name, default).split(",") if v.strip()]
+
+
+# --- SECURITY & ENVIRONMENT ---
+DEBUG = _env_bool("DJANGO_DEBUG", True)
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "").strip()
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = "django-insecure-local-development-key-do-not-use-in-production"
+    else:
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is not true.")
+
+ALLOWED_HOSTS = _env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,[::1]")
+CSRF_TRUSTED_ORIGINS = _env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
 
 # --- APPS & MIDDLEWARE ---
 INSTALLED_APPS = [
@@ -36,7 +57,7 @@ INSTALLED_APPS = [
     "students",
     "academics",
     "dashboard",
-    # "payroll",
+    "finance",  # <-- ADDED
 ]
 
 MIDDLEWARE = [
@@ -72,10 +93,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "wsgi.application"
 
-# --- DATABASE ---
+# --- DATABASE (PostgreSQL) ---
 DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+    "default": dj_database_url.parse(
+        os.environ.get(
+            "DATABASE_URL",
+            "postgres://school:school@localhost:5432/school_monitor"
+        ),
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -102,13 +126,21 @@ USE_TZ = True
 # --- STATIC & MEDIA ---
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"  # Where WhiteNoise collects files for production
-
-# WhiteNoise compression & caching for production
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
+}
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-LOGOUT_REDIRECT_URL = "accounts:login"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO")},
+}

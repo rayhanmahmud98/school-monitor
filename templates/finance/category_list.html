@@ -1,0 +1,43 @@
+{% extends base_template %}
+{% block title %}Fee categories{% endblock %}
+{% block content %}
+<section>
+  <div class="app-heading">
+    <div><h2>Fee categories</h2><p>Deactivate or archive a category that has history; delete only unused ones</p></div>
+    <a href="{% url 'finance:category_create' %}" class="app-btn-primary"><i class="fa-solid fa-plus"></i> Add fee category</a>
+  </div>
+  <div class="app-table-card"><div class="app-table-scroll">
+    <table class="app-table">
+      <thead><tr><th>Code</th><th>Name</th><th>Frequency</th><th>Installments</th><th>Status</th><th>Used by</th><th class="text-center">Actions</th></tr></thead>
+      <tbody>
+      {% for r in rows %}
+        <tr>
+          <td data-label="Code">{{ r.category.code }}</td>
+          <td data-label="Name">{{ r.category.name }}</td>
+          <td data-label="Frequency">{{ r.category.get_default_frequency_display }}</td>
+          <td data-label="Installments">{% if r.category.allow_installments %}Allowed{% if r.category.max_installments %} (max {{ r.category.max_installments }}){% endif %}{% else %}No{% endif %}</td>
+          <td data-label="Status"><span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold {% if r.category.status == 'ACTIVE' %}bg-emerald-100 text-emerald-800{% elif r.category.status == 'INACTIVE' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-600{% endif %}">{{ r.category.get_status_display }}</span></td>
+          <td data-label="Used by" class="text-xs text-slate-500">{% if r.total %}{% for label, n in r.usage.items %}{% if n %}{{ label }}: {{ n }}<br>{% endif %}{% endfor %}{% else %}Not used{% endif %}</td>
+          <td data-label="Actions">
+            <div class="app-actions">
+              <a href="{% url 'finance:category_update' r.category.pk %}" class="app-action-btn" title="Edit"><i class="fa-regular fa-pen-to-square"></i></a>
+              <form method="post" action="{% url 'finance:category_status' r.category.pk %}" class="inline">{% csrf_token %}
+                {% if r.category.status == 'ACTIVE' %}
+                  <button name="status" value="INACTIVE" class="app-action-btn" title="Deactivate"><i class="fa-solid fa-pause"></i></button>
+                {% else %}
+                  <button name="status" value="ACTIVE" class="app-action-btn" title="Activate"><i class="fa-solid fa-play"></i></button>
+                {% endif %}
+                {% if r.category.status != 'ARCHIVED' %}
+                  <button name="status" value="ARCHIVED" class="app-action-btn" title="Archive"><i class="fa-solid fa-box-archive"></i></button>
+                {% endif %}
+              </form>
+              <a href="{% url 'finance:category_delete' r.category.pk %}" class="app-action-btn delete" title="Delete"><i class="fa-regular fa-trash-can"></i></a>
+            </div>
+          </td>
+        </tr>
+      {% empty %}<tr><td colspan="7" class="text-center text-slate-500 py-8">No fee categories yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</section>
+{% endblock %}

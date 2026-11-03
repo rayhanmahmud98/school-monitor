@@ -27,7 +27,7 @@ class ExamForm(TailwindFormMixin, forms.ModelForm):
 class AcademicYearForm(TailwindFormMixin, forms.ModelForm):
     class Meta:
         model = AcademicYear
-        fields = ["name", "is_current"]
+        fields = ["name", "is_current", "start_date", "end_date"]
 
 
 class GradeScaleForm(TailwindFormMixin, forms.ModelForm):

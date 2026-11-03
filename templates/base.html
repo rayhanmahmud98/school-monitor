@@ -177,44 +177,44 @@
   </div>
 </div>
 
-<!-- Mobile bottom navigation with ACTIVE state highlighting -->
+<!-- Mobile bottom navigation with ACTIVE state highlighting and Finance support -->
 <nav class="bottom-nav fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white md:hidden" aria-label="Quick navigation">
-  <div class="grid grid-cols-5">
-    
-    <!-- Home -->
-    <a href="{% url 'dashboard:home' %}" 
-       class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2 {% if request.resolver_match.url_name == 'home' or request.resolver_match.url_name == 'admin' or request.resolver_match.url_name == 'teacher' or request.resolver_match.url_name == 'parent' %}text-indigo-600{% endif %}">
-      <i class="fa-solid fa-house text-[18px]"></i>
-      <span class="text-[10px] font-semibold">Home</span>
-    </a>
-
-    <!-- Students -->
-    <a href="{% url 'students:my_students' %}" 
-       class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2 {% if 'students' in request.path %}text-indigo-600{% endif %}">
-      <i class="fa-solid fa-user-graduate text-[18px]"></i>
-      <span class="text-[10px] font-semibold">Students</span>
-    </a>
-
-    <!-- Attendance -->
-    <a href="{% url 'academics:attendance_mark' %}" 
-       class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2 {% if 'attendance' in request.path %}text-indigo-600{% endif %}">
-      <i class="fa-solid fa-clipboard-user text-[18px]"></i>
-      <span class="text-[10px] font-semibold">Attend</span>
-    </a>
-
-    <!-- Marks -->
-    <a href="{% url 'academics:marks_overview' %}" 
-       class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2 {% if 'marks' in request.path %}text-indigo-600{% endif %}">
-      <i class="fa-solid fa-table-list text-[18px]"></i>
-      <span class="text-[10px] font-semibold">Marks</span>
-    </a>
-
-    <!-- Menu -->
-    <button type="button" data-menu-open class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2" aria-controls="mobile-sidebar" aria-expanded="false">
-      <i class="fa-solid fa-bars text-[18px]"></i>
-      <span class="text-[10px] font-semibold">Menu</span>
-    </button>
-
+  <div class="grid {% if base_template == 'base_finance.html' %}grid-cols-3{% else %}grid-cols-5{% endif %}">
+    {% if base_template == "base_finance.html" %}
+      <a href="{% url 'finance:home' %}" class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2 {% if request.resolver_match.url_name == 'home' %}text-indigo-600{% endif %}">
+        <i class="fa-solid fa-chart-pie text-[18px]"></i>
+        <span class="text-[10px] font-semibold">Finance</span>
+      </a>
+      <a href="{% url 'finance:invoice_list' %}" class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2 {% if 'invoice' in request.path %}text-indigo-600{% endif %}">
+        <i class="fa-solid fa-file-invoice-dollar text-[18px]"></i>
+        <span class="text-[10px] font-semibold">Invoices</span>
+      </a>
+      <button type="button" data-menu-open class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2" aria-controls="mobile-sidebar" aria-expanded="false">
+        <i class="fa-solid fa-bars text-[18px]"></i>
+        <span class="text-[10px] font-semibold">Menu</span>
+      </button>
+    {% else %}
+      <a href="{% url 'dashboard:home' %}" class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2 {% if request.resolver_match.url_name == 'home' or request.resolver_match.url_name == 'admin' or request.resolver_match.url_name == 'teacher' or request.resolver_match.url_name == 'parent' %}text-indigo-600{% endif %}">
+        <i class="fa-solid fa-house text-[18px]"></i>
+        <span class="text-[10px] font-semibold">Home</span>
+      </a>
+      <a href="{% url 'students:my_students' %}" class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2 {% if 'students' in request.path %}text-indigo-600{% endif %}">
+        <i class="fa-solid fa-user-graduate text-[18px]"></i>
+        <span class="text-[10px] font-semibold">Students</span>
+      </a>
+      <a href="{% url 'academics:attendance_mark' %}" class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2 {% if 'attendance' in request.path %}text-indigo-600{% endif %}">
+        <i class="fa-solid fa-clipboard-user text-[18px]"></i>
+        <span class="text-[10px] font-semibold">Attend</span>
+      </a>
+      <a href="{% url 'academics:marks_overview' %}" class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2 {% if 'marks' in request.path %}text-indigo-600{% endif %}">
+        <i class="fa-solid fa-table-list text-[18px]"></i>
+        <span class="text-[10px] font-semibold">Marks</span>
+      </a>
+      <button type="button" data-menu-open class="flex min-h-[62px] flex-col items-center justify-center gap-1 py-2" aria-controls="mobile-sidebar" aria-expanded="false">
+        <i class="fa-solid fa-bars text-[18px]"></i>
+        <span class="text-[10px] font-semibold">Menu</span>
+      </button>
+    {% endif %}
   </div>
 </nav>
 

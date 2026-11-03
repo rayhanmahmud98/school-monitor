@@ -25,5 +25,6 @@
 {% url 'accounts:login_history' as u %}{% include "partials/nav_item.html" with url=u icon="fa-right-to-bracket" label="Login history" show_label=show_label %}
 
 <p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">Settings</p>
+{% include "partials/finance_nav.html" with show_label=show_label %}
 {% url 'academics:year_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar" label="Academic years" show_label=show_label %}
 {% url 'academics:scale_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-ranking-star" label="Grading scale" show_label=show_label %}

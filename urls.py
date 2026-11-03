@@ -14,6 +14,10 @@ urlpatterns = [
     path("accounts/", include("accounts.urls")),
     path("students/", include("students.urls")),
     path("academics/", include("academics.urls")),
+    
+    # New Finance app
+    path("finance/", include("finance.urls")),
+    
     path("django-admin/", admin.site.urls),
 ]
 

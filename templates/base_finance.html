@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block nav %}
+  {% include "partials/finance_nav.html" with show_label=0 %}
+{% endblock %}
+
+{% block nav_mobile %}
+  {% include "partials/finance_nav.html" with show_label=1 %}
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends base_template %}
+{% load finance_tags %}
+{% block title %}{{ invoice.invoice_no }}{% endblock %}
+{% block content %}
+<section>
+  <div class="app-heading"><div><h2>{{ invoice.invoice_no }}</h2><p>{{ invoice.student.full_name }} &middot; {{ invoice.student.student_id }} &middot; {{ invoice.student.class_ref }}</p></div>
+    <div class="flex gap-2">
+      <a href="{% url 'finance:invoice_list' %}" class="app-btn-light">Back</a>
+      {% if invoice.status != 'CANCELLED' %}
+        {% if request.user|can:"adjust_invoice" %}<a href="{% url 'finance:invoice_adjust' invoice.pk %}" class="app-btn-light">Adjust</a>{% endif %}
+        {% if request.user|can:"cancel_invoice" and invoice.paid_total == 0 %}<a href="{% url 'finance:invoice_cancel' invoice.pk %}" class="app-btn-danger">Cancel invoice</a>{% endif %}
+      {% endif %}
+    </div></div>
+
+  <div class="grid gap-6 lg:grid-cols-3">
+    <div class="card p-5 lg:col-span-2">
+      <h3 class="font-semibold mb-3">{{ invoice.description_snapshot }}</h3>
+      <dl class="grid grid-cols-2 gap-y-2 text-sm">
+        <dt class="text-slate-500">Category</dt><dd>{{ invoice.category_name_snapshot }} ({{ invoice.category_code_snapshot }})</dd>
+        <dt class="text-slate-500">Original amount</dt><dd>{{ invoice.original_amount|floatformat:"2g" }}</dd>
+        <dt class="text-slate-500">Discounts and waivers</dt><dd>- {{ invoice.discount_total|floatformat:"2g" }}</dd>
+        <dt class="text-slate-500">Penalties</dt><dd>+ {{ invoice.penalty_total|floatformat:"2g" }}</dd>
+        <dt class="text-slate-500 font-semibold">Net payable</dt><dd class="font-semibold">{{ invoice.net_payable|floatformat:"2g" }}</dd>
+        <dt class="text-slate-500">Paid</dt><dd>{{ invoice.paid_total|floatformat:"2g" }}</dd>
+        <dt class="text-slate-500 font-semibold">Balance</dt><dd class="font-semibold">{{ invoice.balance|floatformat:"2g" }}</dd>
+        <dt class="text-slate-500">Issued</dt><dd>{{ invoice.issue_date|date:"d M Y" }} by {{ invoice.issued_by.display_name|default:"system" }}</dd>
+        <dt class="text-slate-500">Due</dt><dd>{{ invoice.due_date|date:"d M Y" }}</dd>
+        <dt class="text-slate-500">Status</dt><dd>{{ invoice.get_status_display }}{% if invoice.cancelled_reason %} &mdash; {{ invoice.cancelled_reason }}{% endif %}</dd>
+      </dl>
+    </div>
+    <div class="card p-5">
+      <h3 class="font-semibold mb-3">Adjustments</h3>
+      <ul class="divide-y divide-slate-100 text-sm">
+        {% for a in adjustments %}
+        <li class="py-2"><div class="flex justify-between"><span>{{ a.get_kind_display }}{% if a.discount_rule %}: {{ a.discount_rule.name }}{% endif %}</span><strong>{{ a.amount|floatformat:"2g" }}</strong></div>
+          {% if a.reason %}<div class="text-xs text-slate-500">{{ a.reason }}</div>{% endif %}</li>
+        {% empty %}<li class="py-2 text-slate-500">None.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card p-5 mt-6">
+    <h3 class="font-semibold mb-3">Ledger entries</h3>
+    {% for tx in txs %}
+      <div class="mb-3 text-sm"><div class="font-medium">{{ tx.get_tx_type_display|default:tx.tx_type }} &middot; {{ tx.posting_date|date:"d M Y" }} <span class="text-slate-400">#{{ tx.pk }}</span></div>
+        <table class="mt-1 w-full text-xs"><thead><tr class="text-left text-slate-500"><th>Account</th><th class="text-right">Debit</th><th class="text-right">Credit</th></tr></thead>
+          {% for ln in tx.lines.all %}<tr><td>{{ ln.account }}</td><td class="text-right">{% if ln.debit %}{{ ln.debit|floatformat:"2g" }}{% endif %}</td><td class="text-right">{% if ln.credit %}{{ ln.credit|floatformat:"2g" }}{% endif %}</td></tr>{% endfor %}
+        </table></div>
+    {% empty %}<p class="text-sm text-slate-500">No ledger entries.</p>{% endfor %}
+  </div>
+</section>
+{% endblock %}

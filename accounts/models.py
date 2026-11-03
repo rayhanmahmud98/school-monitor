@@ -12,6 +12,9 @@ class User(AbstractUser):
         ADMIN = "ADMIN", "Admin"
         TEACHER = "TEACHER", "Teacher"
         PARENT = "PARENT", "Parent"
+        ACCOUNTANT = "ACCOUNTANT", "Accountant"
+        CLERK = "CLERK", "Data-entry clerk"
+        AUDITOR = "AUDITOR", "Auditor"
 
     role = models.CharField(max_length=10, choices=Role.choices, default=Role.PARENT)
 

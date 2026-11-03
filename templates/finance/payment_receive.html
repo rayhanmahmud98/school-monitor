@@ -1,0 +1,32 @@
+cat > templates/finance/payment_receive.html << 'HTMLEOF'
+{% extends "base_finance.html" %}
+{% block title %}Receive payment{% endblock %}
+{% block page_heading %}Receive payment{% endblock %}
+{% block page_subtitle %}Invoice {{ invoice.invoice_no }} · {{ invoice.student.full_name }}{% endblock %}
+
+{% block content %}
+<div class="card p-6 max-w-2xl mx-auto mt-6">
+  <div class="mb-4 rounded-lg bg-slate-50 p-4 text-sm">
+    <div><strong>Invoice:</strong> {{ invoice.invoice_no }}</div>
+    <div><strong>Student:</strong> {{ invoice.student.full_name }} · {{ invoice.student.class_ref }}</div>
+    <div><strong>Category:</strong> {{ invoice.fee_category.name }}</div>
+    <div><strong>Total:</strong> {{ invoice.net_payable }} · <strong class="text-rose-600">Balance: {{ invoice.balance }}</strong></div>
+  </div>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+      <div>
+        <label class="block text-sm font-medium mb-1">{{ field.label }}</label>
+        {{ field }}
+        {% for e in field.errors %}<p class="text-red-500 text-xs mt-1">{{ e }}</p>{% endfor %}
+      </div>
+    {% endfor %}
+    <div class="flex gap-3 pt-2">
+      <button class="btn-primary"><i class="fa-solid fa-receipt"></i> Record payment</button>
+      <a href="{% url 'finance:invoice_detail' invoice.pk %}" class="btn-light">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+HTMLEOF

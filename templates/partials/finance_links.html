@@ -1,0 +1,43 @@
+{% load finance_tags %}
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">Billing</p>
+
+{% if request.user|can:"view_finance" %}
+{% url 'finance:clerk_new_invoice' as u %}{% include "partials/nav_item.html" with url=u icon="fa-plus-circle" label="New invoice" show_label=show_label %}
+{% url 'finance:invoice_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-file-invoice-dollar" label="Invoices" show_label=show_label %}
+{% endif %}
+
+
+{% if request.user|can:"allocate_payment" %}
+{% url 'finance:allocation_dashboard' as u %}{% include "partials/nav_item.html" with url=u icon="fa-link" label="Allocations" show_label=show_label %}
+{% endif %}
+
+{% if request.user|can:"generate_invoice" %}
+{% url 'finance:invoice_generate' as u %}{% include "partials/nav_item.html" with url=u icon="fa-bolt" label="Bulk generate" show_label=show_label %}
+{% endif %}
+
+{% if request.user|can:"award_discount" %}
+{% url 'finance:award_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-award" label="Discount awards" show_label=show_label %}
+{% endif %}
+
+{% if request.user|can:"manage_feecategory" or request.user|can:"manage_feerule" or request.user|can:"manage_discountrule" or request.user|can:"manage_installmentoption" %}
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">Fee setup</p>
+{% endif %}
+{% if request.user|can:"manage_feecategory" %}
+{% url 'finance:category_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-tags" label="Fee categories" show_label=show_label %}
+{% url 'finance:studentcategory_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-users-gear" label="Student categories" show_label=show_label %}
+{% endif %}
+{% if request.user|can:"manage_feerule" %}
+{% url 'finance:matrix' as u %}{% include "partials/nav_item.html" with url=u icon="fa-table-cells" label="Fee amounts" show_label=show_label %}
+{% url 'finance:period_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-calendar-days" label="Billing periods" show_label=show_label %}
+{% endif %}
+{% if request.user|can:"manage_installmentoption" %}
+{% url 'finance:installmentoption_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-layer-group" label="Installment options" show_label=show_label %}
+{% endif %}
+{% if request.user|can:"manage_discountrule" %}
+{% url 'finance:discountrule_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-percent" label="Discount rules" show_label=show_label %}
+{% endif %}
+
+{% if request.user|can:"view_audit" %}
+<p class="px-4 pt-4 pb-1 text-xs uppercase tracking-wider text-slate-500 {% if not show_label %}hidden lg:block{% endif %}">Control</p>
+{% url 'finance:audit_list' as u %}{% include "partials/nav_item.html" with url=u icon="fa-shield-halved" label="Finance audit trail" show_label=show_label %}
+{% endif %}

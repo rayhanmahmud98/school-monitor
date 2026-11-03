@@ -1,0 +1,22 @@
+{% extends base_template %}
+{% block title %}Finance audit trail{% endblock %}
+{% block content %}
+<section>
+  <div class="app-heading"><div><h2>Finance audit trail</h2><p>Append-only and hash-chained</p></div>
+    <form method="post">{% csrf_token %}<button class="app-btn-light"><i class="fa-solid fa-shield-halved"></i> Verify chain</button></form></div>
+  <form method="get" class="app-toolbar mb-4"><input name="q" value="{{ q }}" placeholder="Search event, object, reason, person" class="app-input"><button class="app-btn-light">Search</button>{% if q %}<a href="?" class="app-btn-light">Clear</a>{% endif %}</form>
+  <div class="app-table-card"><div class="app-table-scroll">
+    <table class="app-table">
+      <thead><tr><th>#</th><th>When</th><th>Who</th><th>Event</th><th>Object</th><th>Details</th></tr></thead>
+      <tbody>
+      {% for e in page_obj %}
+        <tr><td data-label="#">{{ e.seq }}</td><td data-label="When" class="whitespace-nowrap">{{ e.timestamp|date:"d M Y H:i:s" }}</td><td data-label="Who">{{ e.actor_label }}</td>
+          <td data-label="Event"><strong>{{ e.event_type }}</strong></td><td data-label="Object">{{ e.object_type }} {{ e.object_id }}</td>
+          <td data-label="Details" class="text-xs text-slate-500">{% if e.reason %}Reason: {{ e.reason }}<br>{% endif %}{% if e.new_values %}{{ e.new_values }}{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="6" class="text-center text-slate-500 py-8">No events.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+  {% include "partials/pagination.html" %}
+</section>
+{% endblock %}

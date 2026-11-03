@@ -22,6 +22,9 @@ def home(request):
         "ADMIN": "dashboard:admin",
         "TEACHER": "dashboard:teacher",
         "PARENT": "dashboard:parent",
+        "ACCOUNTANT": "finance:home",
+        "CLERK": "finance:home",
+        "AUDITOR": "finance:home",
     }
     return redirect(target.get(request.user.role, "accounts:login"))
 

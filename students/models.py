@@ -1,6 +1,19 @@
 from django.conf import settings
-from django.db import models
+from django.db import connection, models, transaction
 from django.utils import timezone
+
+
+_STUDENT_ID_LOCK_KEY = 7340001  # arbitrary constant for the PostgreSQL advisory lock
+
+
+def _lock_student_id_sequence():
+    """Serialise student-id generation across concurrent requests (PostgreSQL).
+
+    The lock is released automatically when the surrounding transaction ends.
+    """
+    if connection.vendor == "postgresql":
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pg_advisory_xact_lock(%s)", [_STUDENT_ID_LOCK_KEY])
 
 
 def _next_student_id():
@@ -107,7 +120,9 @@ class Student(models.Model):
     religion = models.CharField(max_length=60, blank=True)
 
     roll_no = models.PositiveIntegerField()
-    class_ref = models.ForeignKey(Class, on_delete=models.CASCADE, related_name="students")
+    # PROTECT: a class that still has students (and therefore possible financial
+    # history) can never be deleted by accident.
+    class_ref = models.ForeignKey(Class, on_delete=models.PROTECT, related_name="students")
     admission_date = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
@@ -135,11 +150,17 @@ class Student(models.Model):
         return " ".join(p for p in parts if p).strip()
 
     def save(self, *args, **kwargs):
-        if not self.student_id:
-            self.student_id = _next_student_id()
         if self.first_name or self.last_name:
             self.full_name = self._compose_full_name()
-        super().save(*args, **kwargs)
+        if self.student_id:
+            super().save(*args, **kwargs)
+            return
+        # New student without an ID: hold a transaction-scoped lock while the ID
+        # is chosen and the row inserted, so two admissions can never collide.
+        with transaction.atomic():
+            _lock_student_id_sequence()
+            self.student_id = _next_student_id()
+            super().save(*args, **kwargs)
 
     @property
     def display_name(self):
@@ -227,48 +248,6 @@ class StudentDocument(models.Model):
         REPORT_CARD = "REPORT", "Previous report card"
         MEDICAL = "MEDICAL", "Medical certificate"
         OTHER = "OTHER", "Other"
-
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="documents")
-    kind = models.CharField(max_length=20, choices=Kind.choices, default=Kind.OTHER)
-    title = models.CharField(max_length=120, blank=True)
-    file = models.FileField(upload_to=document_upload_path)
-    notes = models.TextField(blank=True)
-    uploaded_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True,
-        on_delete=models.SET_NULL, related_name="uploaded_documents",
-    )
-    uploaded_at = models.DateTimeField(default=timezone.now)
-
-    class Meta:
-        ordering = ["-uploaded_at"]
-        indexes = [models.Index(fields=["student", "-uploaded_at"])]
-
-    @property
-    def display_title(self):
-        return self.title or self.get_kind_display()
-
-    @property
-    def filename(self):
-        return self.file.name.rsplit("/", 1)[-1] if self.file else ""
-
-    def __str__(self):
-        return f"{self.display_title} — {self.student.full_name}"
-    
-
-def document_upload_path(instance, filename):
-    sid = instance.student.student_id or f"pk{instance.student.pk}"
-    return f"student_documents/{sid}/{filename}"
-
-
-# class StudentDocument(models.Model):
-#     class Kind(models.TextChoices):
-#         BIRTH_CERTIFICATE = "BIRTH_CERT", "Birth certificate"
-#         NATIONAL_ID = "NID", "National ID"
-#         PREVIOUS_TC = "PREV_TC", "Previous transfer certificate"
-#         PASSPORT_PHOTO = "PHOTO", "Passport photo"
-#         REPORT_CARD = "REPORT", "Previous report card"
-#         MEDICAL = "MEDICAL", "Medical certificate"
-#         OTHER = "OTHER", "Other"
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="documents")
     kind = models.CharField(max_length=20, choices=Kind.choices, default=Kind.OTHER)

@@ -1,0 +1,44 @@
+{% extends "base_finance.html" %}
+{% block title %}New Invoice / Payment{% endblock %}
+{% block page_heading %}New Invoice / Payment{% endblock %}
+{% block page_subtitle %}Create an invoice and receive payment, or receive payment without invoicing.{% endblock %}
+{% block content %}
+<div class="card p-6 max-w-3xl mx-auto mt-6">
+  <form method="post" class="space-y-4" id="new-invoice-form">
+    {% csrf_token %}
+    {{ form.idempotency_key }}
+    {% if form.non_field_errors %}
+      <div class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% for field in form %}
+      {% if field.name != "idempotency_key" and field.name != "mode" %}
+        <div>
+          <label class="block text-sm font-medium mb-1">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="text-xs text-slate-500 mt-1">{{ field.help_text }}</p>{% endif %}
+          {% for e in field.errors %}<p class="text-red-500 text-xs mt-1">{{ e }}</p>{% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <input type="hidden" name="mode" id="id_mode" value="invoice">
+
+    <div class="flex flex-wrap gap-3 pt-2">
+      <button type="submit" name="mode" value="invoice" class="btn-primary">
+        <i class="fa-solid fa-file-invoice"></i> Create invoice &amp; receive payment
+      </button>
+      <button type="submit" name="mode" value="credit" class="btn-light">
+        <i class="fa-solid fa-receipt"></i> Receive payment without invoice
+      </button>
+      <a href="{% url 'finance:invoice_list' %}" class="btn-light">Cancel</a>
+    </div>
+  </form>
+
+  <p class="text-xs text-slate-500 mt-4">
+    Both buttons use the same form. Choose the first to create the selected invoices and
+    apply the amount against them. Choose the second to record the payment as student
+    credit for later allocation.
+  </p>
+</div>
+{% endblock %}

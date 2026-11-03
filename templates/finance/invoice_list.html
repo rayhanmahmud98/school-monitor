@@ -1,0 +1,38 @@
+{% extends base_template %}
+{% load finance_tags %}
+{% block title %}Invoices{% endblock %}
+{% block content %}
+<section>
+  <div class="app-heading"><div><h2>Invoices</h2><p>{{ totals.n }} invoice(s) &middot; net {{ totals.net|default:0|floatformat:"2g" }} &middot; paid {{ totals.paid|default:0|floatformat:"2g" }} &middot; balance {{ totals.balance|default:0|floatformat:"2g" }}</p></div>
+    {% if request.user|can:"generate_invoice" %}<a href="{% url 'finance:invoice_generate' %}" class="app-btn-primary"><i class="fa-solid fa-bolt"></i> Generate invoices</a>{% endif %}</div>
+  <form method="get" class="app-toolbar mb-4 flex-wrap">
+    <input name="q" value="{{ f.q }}" placeholder="Student, student ID or invoice no." class="app-input">
+    <select name="status" class="app-input"><option value="">Any status</option>{% for v, l in statuses %}<option value="{{ v }}" {% if f.status == v %}selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+    <select name="category" class="app-input"><option value="">Any category</option>{% for c in categories %}<option value="{{ c.pk }}" {% if f.category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+    <select name="period" class="app-input"><option value="">Any period</option>{% for p in periods %}<option value="{{ p.pk }}" {% if f.period == p.pk|stringformat:"s" %}selected{% endif %}>{{ p }}</option>{% endfor %}</select>
+    <label class="flex items-center gap-1 text-sm"><input type="checkbox" name="overdue" value="1" {% if f.overdue == "1" %}checked{% endif %}> Overdue only</label>
+    <button class="app-btn-light">Filter</button><a href="?" class="app-btn-light">Reset</a>
+  </form>
+  <div class="app-table-card"><div class="app-table-scroll">
+    <table class="app-table">
+      <thead><tr><th>Invoice</th><th>Student</th><th>Category</th><th>Period</th><th>Net</th><th>Paid</th><th>Balance</th><th>Due</th><th>Status</th></tr></thead>
+      <tbody>
+      {% for i in page_obj %}
+        <tr>
+          <td data-label="Invoice"><a class="text-indigo-600 hover:underline" href="{% url 'finance:invoice_detail' i.pk %}">{{ i.invoice_no }}</a></td>
+          <td data-label="Student">{{ i.student.full_name }}<div class="text-xs text-slate-500">{{ i.student.student_id }} &middot; {{ i.student.class_ref }}</div></td>
+          <td data-label="Category">{{ i.category_name_snapshot }}</td>
+          <td data-label="Period">{{ i.billing_period.label }}</td>
+          <td data-label="Net">{{ i.net_payable|floatformat:"2g" }}</td>
+          <td data-label="Paid">{{ i.paid_total|floatformat:"2g" }}</td>
+          <td data-label="Balance"><strong>{{ i.balance|floatformat:"2g" }}</strong></td>
+          <td data-label="Due" class="{% if i.is_overdue %}text-red-600 font-medium{% endif %}">{{ i.due_date|date:"d M Y" }}</td>
+          <td data-label="Status"><span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold {% if i.status == 'PAID' %}bg-emerald-100 text-emerald-800{% elif i.status == 'CANCELLED' %}bg-slate-100 text-slate-500{% elif i.is_overdue %}bg-red-100 text-red-800{% else %}bg-amber-100 text-amber-800{% endif %}">{% if i.is_overdue %}Overdue{% else %}{{ i.get_status_display }}{% endif %}</span></td>
+        </tr>
+      {% empty %}<tr><td colspan="9" class="text-center text-slate-500 py-8">No invoices match.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+  {% include "partials/pagination.html" %}
+</section>
+{% endblock %}

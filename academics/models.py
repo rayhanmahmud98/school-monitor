@@ -10,9 +10,17 @@ from django.core.exceptions import ValidationError
 class AcademicYear(models.Model):
     name = models.CharField(max_length=20, unique=True, help_text="e.g. 2026-2027")
     is_current = models.BooleanField(default=False)
+    start_date = models.DateField(null=True, blank=True,
+                                  help_text="First day of the year (used by finance).")
+    end_date = models.DateField(null=True, blank=True,
+                                help_text="Last day of the year (used by finance).")
 
     class Meta:
         ordering = ["-name"]
+
+    def clean(self):
+        if self.start_date and self.end_date and self.end_date < self.start_date:
+            raise ValidationError("End date cannot be before the start date.")
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
