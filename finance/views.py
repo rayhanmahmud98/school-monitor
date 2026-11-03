@@ -327,7 +327,7 @@ def invoice_detail(request, pk):
         "txs": txs})
 
 
-@finance_permission_required("generate_invoice")
+@finance_permission_required("view_finance")
 def invoice_generate(request):
     form = BulkGenerateForm(request.POST or None)
     preview = result = None
@@ -399,7 +399,7 @@ def audit_list(request):
 
 # ---- unified new invoice / receive payment ------------------------------------------------
 
-@finance_permission_required("generate_invoice")
+@finance_permission_required("view_finance")
 def clerk_new_invoice(request):
     """
     Unified payment entry. Depending on form.mode:
