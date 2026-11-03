@@ -158,7 +158,7 @@ class PaymentAllocation(models.Model):
         ordering = ["-allocated_at"]
         constraints = [
             models.CheckConstraint(
-                check=models.Q(amount__gt=0),
+                condition=models.Q(amount__gt=0),
                 name="paymentallocation_amount_positive",
             ),
         ]
