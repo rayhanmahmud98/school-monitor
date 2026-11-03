@@ -56,7 +56,6 @@ def admin_dashboard(request):
     attendance_rate = round(attended_total / attendance_total * 100, 1) if attendance_total else None
 
     # Average grade percentage across all marksheets.
-    # Use Decimal("100") instead of 100.0 so Django can infer the output field.
     avg_pct = (
         Marksheet.objects
         .annotate(pct=F("marks_obtained") * Decimal("100") / F("max_marks"))
@@ -126,7 +125,6 @@ def admin_dashboard(request):
     recent = AuditLog.objects.select_related("user")[:10]
 
     return render(request, "dashboard/admin.html", {
-        # stat cards
         "students": total_students,
         "teachers": total_teachers,
         "parents": total_parents,
@@ -135,19 +133,16 @@ def admin_dashboard(request):
         "avg_grade_percent": avg_grade_percent,
         "pending_batches": pending_batches,
         "unpublished_cards": unpublished_cards,
-        # today's snapshot for the small panel
         "attendance": Attendance.objects.filter(date=today).aggregate(
             total=Count("id"),
             attended=Count("id", filter=Q(status__in=["PRESENT", "LATE"])),
         ),
-        # charts
         "chart_attendance_labels": labels,
         "chart_attendance_values": rate_series,
         "chart_gender_labels": gender_labels,
         "chart_gender_values": gender_values,
         "chart_class_labels": class_labels,
         "chart_class_values": class_values,
-        # footer
         "recent": recent,
     })
 
@@ -188,38 +183,3 @@ def parent_dashboard(request):
             .exclude(pdf_file="").select_related("exam"),
         )
     return render(request, "dashboard/parent.html", ctx)
-
-
-from datetime import timedelta
-from decimal import Decimal
-
-from django.contrib.auth.decorators import login_required
-from django.db.models import Avg, Count, F, Q
-from django.shortcuts import redirect, render
-from django.utils import timezone
-from django.views.decorators.http import require_GET
-
-from academics.models import Attendance, AuditLog, Exam, Marksheet, ReportCard, IDCard
-from academics.services import attendance_summary
-from academics.views import build_batches, get_child
-from accounts.models import User
-from accounts.permissions import ADMIN, PARENT, TEACHER, role_required
-from accounts.scope import teacher_classes, teacher_subjects
-from students.models import Class, Student
-
-# ... (Keep all your existing dashboard views: home, admin_dashboard, teacher_dashboard, parent_dashboard) ...
-
-@require_GET
-def verify_id_card(request, token):
-    """Public view to verify a student or teacher ID card via QR code."""
-    card = IDCard.objects.select_related(
-        "student__class_ref", "teacher__teacher_profile"
-    ).filter(uuid=token).first()
-    
-    if not card:
-        return render(request, "dashboard/verify_id_card.html", {"invalid": True}, status=404)
-        
-    return render(request, "dashboard/verify_id_card.html", {
-        "card": card, 
-        "is_valid": card.is_valid()
-    })
